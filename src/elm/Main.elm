@@ -1,8 +1,10 @@
 module Main exposing (Message(..), Model, init, main, subscriptions, update, view)
 
 import Browser
-import Html exposing (Html, h1, text)
-import Html.Attributes exposing (style)
+import Bulma.Elements as BElements
+import Html exposing (Html, div, h1, p, text)
+import Html.Attributes exposing (class, style)
+import Markdown
 import String
 
 
@@ -39,7 +41,7 @@ textToPresentation text =
 
 testString : String
 testString =
-    "# Title\n    ---\n    ## A second slide\n    ---\n    ## A third slide"
+    "# Title\n    ---\n## A second slide\n    ---\n## A third slide"
 
 
 init : () -> ( Model, Cmd Message )
@@ -53,8 +55,15 @@ init _ =
 
 view : Model -> Html Message
 view model =
-    h1 [ style "display" "flex", style "justify-content" "center" ]
-        [ text "Hello Elm!" ]
+    div []
+        (List.map slideToBox model.presentation)
+
+
+slideToBox : Slide -> BElements.Box Message
+slideToBox slide =
+    BElements.box
+        []
+        [ div [ class "content" ] [ Markdown.toHtml [] slide.text ] ]
 
 
 
