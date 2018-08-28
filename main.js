@@ -1,8 +1,8 @@
 "use strict"
 
 const electron = require("electron")
-
 const app = electron.app
+
 const BrowserWindow = electron.BrowserWindow
 
 let mainWindow
@@ -28,3 +28,9 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (mainWindow === null) { createWindow() }
 })
+
+// var elmApp = Elm.Main.init({node: document.getElementById('container')});
+// elmApp.ports.savePresentationText.subscribe(str => {
+//   console.log(str)
+// })
+

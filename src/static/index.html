@@ -13,7 +13,25 @@
       <div id="container" class="container"></div>
     </section>
     <script>
-      var app = Elm.Main.init({node: document.getElementById('container')});
+      const {dialog} = require('electron').remote
+      var fs = require("fs")
+      var elmApp = Elm.Main.init({node: document.getElementById('container')});
+
+      elmApp.ports.savePresentationText.subscribe(str => {
+        console.log(str)
+        dialog.showSaveDialog((filename) => {
+          if (filename === undefined) {
+            console.log("oops")
+            return
+          }
+          fs.writeFile(filename, str, (err) => {
+            if (err) {
+              console.log(err)
+              return
+            }
+          })
+        })
+      })
     </script>
   </body>
 </html>
