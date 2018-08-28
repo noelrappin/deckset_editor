@@ -9,6 +9,8 @@ type Message
     | SlideDown Slide
     | EditSlide Slide
     | SavePresentation
+    | LoadPresentation String
+    | OpenFileDialog
 
 
 update : Message -> Model -> ( Model, Cmd Message )
@@ -30,6 +32,16 @@ update message model =
 
         EditSlide slide ->
             ( model, Cmd.none )
+
+        OpenFileDialog ->
+            ( model, Ports.openFileDialog () )
+
+        LoadPresentation string ->
+            ( { model
+                | presentation = Model.textToPresentation string
+              }
+            , Cmd.none
+            )
 
         SavePresentation ->
             ( model

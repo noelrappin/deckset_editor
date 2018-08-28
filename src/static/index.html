@@ -32,6 +32,23 @@
           })
         })
       })
+
+      elmApp.ports.openFileDialog.subscribe(() => {
+        dialog.showOpenDialog((fileNames) => {
+          if(fileNames === undefined){
+            console.log("No file selected")
+            return
+          }
+          fs.readFile(fileNames[0], 'utf-8', (err, data) => {
+            if(err){
+                alert("An error ocurred reading the file :" + err.message)
+                return;
+            }
+            elmApp.ports.loadPresentationText.send(data)
+          })
+        })
+
+      })
     </script>
   </body>
 </html>

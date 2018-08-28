@@ -10,12 +10,12 @@ import View exposing (view)
 
 init : () -> ( Model, Cmd Message )
 init _ =
-    ( { presentation = Model.textToPresentation Model.testString }, Cmd.none )
+    ( { presentation = [] }, Cmd.none )
 
 
 subscriptions : Model -> Sub Message
 subscriptions model =
-    Sub.none
+    Ports.loadPresentationText Update.LoadPresentation
 
 
 main : Program () Model Message

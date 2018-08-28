@@ -8,6 +8,7 @@ import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 import Markdown
 import Model exposing (Model, Presentation, Slide)
+import Ports exposing (openFileDialog)
 import Update exposing (Message)
 
 
@@ -29,6 +30,9 @@ view model =
                 |> List.map slideToBox
             )
         , Html.br [] []
+        , div
+            [ onClick Update.OpenFileDialog ]
+            [ primaryButton "Open Document" ]
         , div
             [ onClick Update.SavePresentation ]
             [ primaryButton "Save Document" ]
