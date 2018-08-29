@@ -106,6 +106,9 @@ editModeContents slide =
             , BLayout.levelItem
                 [ onClick (Update.SaveSlide slide) ]
                 [ text "Save" ]
+            , BLayout.levelItem
+                [ onClick (Update.CancelSlide slide) ]
+                [ text "Cancel" ]
             , BLayout.levelRight []
                 [ BLayout.levelItem
                     [ onClick (Update.SlideDown slide) ]

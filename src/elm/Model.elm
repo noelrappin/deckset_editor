@@ -1,4 +1,4 @@
-module Model exposing (Mode(..), Model, Presentation, Slide, isNextAfter, isPreviousTo, makeEditable, nextSlide, presentationInOrder, presentationToString, previousSlide, saveSlide, slideFromIntAndText, textToPresentation, updateEditText)
+module Model exposing (Mode(..), Model, Presentation, Slide, cancelSlide, isNextAfter, isPreviousTo, makeEditable, nextSlide, presentationInOrder, presentationToString, previousSlide, saveSlide, slideFromIntAndText, textToPresentation, updateEditText)
 
 import List.Extra as List
 
@@ -105,3 +105,10 @@ saveSlide slide presentation =
                     , text = s.editText
                 }
             )
+
+
+cancelSlide : Slide -> Presentation -> Presentation
+cancelSlide slide presentation =
+    presentation
+        |> List.updateAt slide.order
+            (\s -> { s | mode = Display })
