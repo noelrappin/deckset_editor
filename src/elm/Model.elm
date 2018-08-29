@@ -1,8 +1,19 @@
-module Model exposing (Model, Presentation, Slide, isNextAfter, isPreviousTo, nextSlide, presentationInOrder, presentationToString, previousSlide, slideFromIntAndText, testString, textToPresentation)
+module Model exposing (Mode(..), Model, Presentation, Slide, isNextAfter, isPreviousTo, makeEditable, nextSlide, presentationInOrder, presentationToString, previousSlide, saveSlide, slideFromIntAndText, textToPresentation, updateEditText)
+
+import List.Extra as List
+
+
+type Mode
+    = Display
+    | Edit
 
 
 type alias Slide =
-    { text : String, order : Int }
+    { text : String
+    , order : Int
+    , mode : Mode
+    , editText : String
+    }
 
 
 type alias Presentation =
@@ -15,7 +26,11 @@ type alias Model =
 
 slideFromIntAndText : Int -> String -> Slide
 slideFromIntAndText int text =
-    { text = text, order = int }
+    { text = String.trim text
+    , order = int
+    , mode = Display
+    , editText = ""
+    }
 
 
 textToPresentation : String -> Presentation
@@ -28,11 +43,6 @@ presentationInOrder : Presentation -> Presentation
 presentationInOrder presentation =
     presentation
         |> List.sortBy .order
-
-
-testString : String
-testString =
-    "# Title\n    ---\n## A second slide\n    ---\n## A third slide"
 
 
 presentationToString : Presentation -> String
@@ -64,3 +74,34 @@ isPreviousTo targetSlide testSlide =
 isNextAfter : Slide -> Slide -> Bool
 isNextAfter targetSlide testSlide =
     testSlide.order == (targetSlide.order + 1)
+
+
+makeEditable : Slide -> Presentation -> Presentation
+makeEditable slide presentation =
+    presentation
+        |> List.updateAt slide.order
+            (\s ->
+                { s
+                    | mode = Edit
+                    , editText = s.text
+                }
+            )
+
+
+updateEditText : Slide -> String -> Presentation -> Presentation
+updateEditText slide newEditText presentation =
+    presentation
+        |> List.updateAt slide.order
+            (\s -> { s | editText = newEditText })
+
+
+saveSlide : Slide -> Presentation -> Presentation
+saveSlide slide presentation =
+    presentation
+        |> List.updateAt slide.order
+            (\s ->
+                { s
+                    | mode = Display
+                    , text = s.editText
+                }
+            )

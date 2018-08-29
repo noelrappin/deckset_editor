@@ -5,12 +5,14 @@ import Ports
 
 
 type Message
-    = SlideUp Slide
-    | SlideDown Slide
-    | EditSlide Slide
-    | SavePresentation
+    = EditSlide Slide
     | LoadPresentation String
     | OpenFileDialog
+    | SavePresentation
+    | SaveSlide Slide
+    | SlideDown Slide
+    | SlideTextChanged Slide String
+    | SlideUp Slide
 
 
 update : Message -> Model -> ( Model, Cmd Message )
@@ -31,7 +33,11 @@ update message model =
             )
 
         EditSlide slide ->
-            ( model, Cmd.none )
+            ( { model
+                | presentation = Model.makeEditable slide model.presentation
+              }
+            , Cmd.none
+            )
 
         OpenFileDialog ->
             ( model, Ports.openFileDialog () )
@@ -47,6 +53,20 @@ update message model =
             ( model
             , Ports.savePresentationText
                 (Model.presentationToString model.presentation)
+            )
+
+        SlideTextChanged slide string ->
+            ( { model
+                | presentation = Model.updateEditText slide string model.presentation
+              }
+            , Cmd.none
+            )
+
+        SaveSlide slide ->
+            ( { model
+                | presentation = Model.saveSlide slide model.presentation
+              }
+            , Cmd.none
             )
 
 
