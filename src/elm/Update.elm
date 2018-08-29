@@ -5,7 +5,8 @@ import Ports
 
 
 type Message
-    = CancelSlide Slide
+    = AppendSlide Slide
+    | CancelSlide Slide
     | EditSlide Slide
     | LoadPresentation String
     | OpenFileDialog
@@ -73,6 +74,13 @@ update message model =
         CancelSlide slide ->
             ( { model
                 | presentation = Model.cancelSlide slide model.presentation
+              }
+            , Cmd.none
+            )
+
+        AppendSlide slide ->
+            ( { model
+                | presentation = Model.appendSlide slide model.presentation
               }
             , Cmd.none
             )

@@ -1,6 +1,7 @@
-module Model exposing (Mode(..), Model, Presentation, Slide, cancelSlide, isNextAfter, isPreviousTo, makeEditable, nextSlide, presentationInOrder, presentationToString, previousSlide, saveSlide, slideFromIntAndText, textToPresentation, updateEditText)
+module Model exposing (Mode(..), Model, Presentation, Slide, appendSlide, cancelSlide, isNextAfter, isPreviousTo, makeEditable, nextSlide, presentationInOrder, presentationToString, previousSlide, saveSlide, slideFromIntAndText, textToPresentation, updateEditText)
 
 import List.Extra as List
+import Tuple
 
 
 type Mode
@@ -112,3 +113,29 @@ cancelSlide slide presentation =
     presentation
         |> List.updateAt slide.order
             (\s -> { s | mode = Display })
+
+
+appendSlide : Slide -> Presentation -> Presentation
+appendSlide slide presentation =
+    presentation
+        |> List.map (increaseOrderIfAfter slide.order)
+        |> List.append [ newSlideAfter slide ]
+        |> List.sortBy .order
+
+
+newSlideAfter : Slide -> Slide
+newSlideAfter slide =
+    { text = ""
+    , order = slide.order + 1
+    , mode = Edit
+    , editText = ""
+    }
+
+
+increaseOrderIfAfter : Int -> Slide -> Slide
+increaseOrderIfAfter index slide =
+    if slide.order > index then
+        { slide | order = slide.order + 1 }
+
+    else
+        slide

@@ -72,14 +72,17 @@ displayModeContents slide =
                 [ BLayout.levelItem
                     [ onClick (Update.SlideUp slide) ]
                     [ text "Up" ]
-                ]
-            , BLayout.levelItem
-                [ onClick (Update.EditSlide slide) ]
-                [ text "Edit" ]
-            , BLayout.levelRight []
-                [ BLayout.levelItem
+                , BLayout.levelItem
                     [ onClick (Update.SlideDown slide) ]
                     [ text "Down" ]
+                ]
+            , BLayout.levelRight []
+                [ BLayout.levelItem
+                    [ onClick (Update.EditSlide slide) ]
+                    [ text "Edit" ]
+                , BLayout.levelItem
+                    [ onClick (Update.AppendSlide slide) ]
+                    [ text "Append" ]
                 ]
             ]
         ]
