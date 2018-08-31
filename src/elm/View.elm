@@ -35,32 +35,42 @@ slideBoxes presentation =
         Model.presentationInOrder presentation
 
 
+displayPresentationSlides : Presentation -> Html Message
+displayPresentationSlides presentation =
+    BColumns.columns multilineColumnsModifiers
+        []
+    <|
+        slideBoxes presentation
+            ++ [ BColumns.column BColumns.columnModifiers
+                    [ class "is-one-quarter" ]
+                    [ div
+                        [ onClick Update.AddSlideToEnd ]
+                        [ primaryButton "+" ]
+                    ]
+               ]
+
+
 view : Model -> Html Message
 view model =
     div []
-        [ BColumns.columns multilineColumnsModifiers
-            []
-          <|
-            slideBoxes model.presentation
-                ++ [ BColumns.column BColumns.columnModifiers
-                        [ class "is-one-quarter" ]
-                        [ div
-                            [ onClick Update.AddSlideToEnd ]
-                            [ primaryButton "+" ]
-                        ]
-                   ]
+        [ displayPresentationSlides model.presentation
         , Html.br [] []
-        , BLayout.level [ class "is-mobile" ]
-            [ BLayout.levelLeft []
-                [ BLayout.levelItem
-                    [ onClick Update.OpenFileDialog ]
-                    [ primaryButton "Open Document" ]
-                ]
-            , BLayout.levelRight []
-                [ BLayout.levelItem
-                    [ onClick Update.SavePresentation ]
-                    [ primaryButton "Save Document" ]
-                ]
+        , viewFooter
+        ]
+
+
+viewFooter : Html Message
+viewFooter =
+    BLayout.level [ class "is-mobile" ]
+        [ BLayout.levelLeft []
+            [ BLayout.levelItem
+                [ onClick Update.OpenFileDialog ]
+                [ primaryButton "Open Document" ]
+            ]
+        , BLayout.levelRight []
+            [ BLayout.levelItem
+                [ onClick Update.SavePresentation ]
+                [ primaryButton "Save Document" ]
             ]
         ]
 

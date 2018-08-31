@@ -1,5 +1,6 @@
 module Update exposing (Message(..), moveSlideDown, moveSlideUp, swapOrder, swapSlides, update)
 
+import Debug
 import List.Extra as List
 import Model exposing (Model, Presentation, Slide)
 import Ports
@@ -61,7 +62,7 @@ update message model =
 
         SlideTextChanged slide string ->
             ( { model
-                | presentation = updateEditText slide string model.presentation
+                | presentation = updateEditText string slide model.presentation
               }
             , Cmd.none
             )
@@ -137,42 +138,49 @@ swapOrder a b slide =
         slide
 
 
+updateSlideAt : Slide -> (Slide -> Slide) -> Presentation -> Presentation
+updateSlideAt slide =
+    List.updateIf <| \s -> slide.order == s.order
+
+
+makeSlideEditable : Slide -> Slide
+makeSlideEditable slide =
+    { slide | mode = Model.Edit, editText = slide.text }
+
+
 makeEditable : Slide -> Presentation -> Presentation
 makeEditable slide presentation =
-    presentation
-        |> List.updateAt slide.order
-            (\s ->
-                { s
-                    | mode = Model.Edit
-                    , editText = s.text
-                }
-            )
+    updateSlideAt slide makeSlideEditable presentation
 
 
-updateEditText : Slide -> String -> Presentation -> Presentation
-updateEditText slide newEditText presentation =
-    presentation
-        |> List.updateAt slide.order
-            (\s -> { s | editText = newEditText })
+updateEditSlide : String -> Slide -> Slide
+updateEditSlide string slide =
+    { slide | editText = string }
+
+
+updateEditText : String -> Slide -> Presentation -> Presentation
+updateEditText newEditText slide presentation =
+    updateSlideAt slide (updateEditSlide newEditText) presentation
+
+
+onSaveSlide : Slide -> Slide
+onSaveSlide slide =
+    { slide | mode = Model.Display, text = slide.editText }
 
 
 saveSlide : Slide -> Presentation -> Presentation
 saveSlide slide presentation =
-    presentation
-        |> List.updateAt slide.order
-            (\s ->
-                { s
-                    | mode = Model.Display
-                    , text = s.editText
-                }
-            )
+    updateSlideAt slide onSaveSlide presentation
+
+
+onCancelSlide : Slide -> Slide
+onCancelSlide slide =
+    { slide | mode = Model.Display }
 
 
 cancelSlide : Slide -> Presentation -> Presentation
 cancelSlide slide presentation =
-    presentation
-        |> List.updateAt slide.order
-            (\s -> { s | mode = Model.Display })
+    updateSlideAt slide onCancelSlide presentation
 
 
 appendSlide : Maybe Slide -> Presentation -> Presentation
