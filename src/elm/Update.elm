@@ -1,4 +1,4 @@
-module Update exposing (Message(..), moveSlideDown, moveSlideUp, swapOrder, swapSlides, update)
+module Update exposing (Message(..), update)
 
 import Debug
 import List.Extra as List
@@ -25,21 +25,21 @@ update message model =
     case message of
         SlideUp slide ->
             ( { model
-                | presentation = moveSlideUp slide model.presentation
+                | presentation = onSlideUp slide model.presentation
               }
             , Cmd.none
             )
 
         SlideDown slide ->
             ( { model
-                | presentation = moveSlideDown slide model.presentation
+                | presentation = onSlideDown slide model.presentation
               }
             , Cmd.none
             )
 
         EditSlide slide ->
             ( { model
-                | presentation = makeEditable slide model.presentation
+                | presentation = onEditSlide slide model.presentation
               }
             , Cmd.none
             )
@@ -62,21 +62,21 @@ update message model =
 
         SlideTextChanged slide string ->
             ( { model
-                | presentation = updateEditText string slide model.presentation
+                | presentation = onSlideTextChanged string slide model.presentation
               }
             , Cmd.none
             )
 
         SaveSlide slide ->
             ( { model
-                | presentation = saveSlide slide model.presentation
+                | presentation = onSaveSlide slide model.presentation
               }
             , Cmd.none
             )
 
         CancelSlide slide ->
             ( { model
-                | presentation = cancelSlide slide model.presentation
+                | presentation = onCancelSlide slide model.presentation
               }
             , Cmd.none
             )
@@ -84,7 +84,7 @@ update message model =
         AppendSlide slide ->
             ( { model
                 | presentation =
-                    appendSlide (Just slide) model.presentation
+                    onAppendSlide (Just slide) model.presentation
               }
             , Cmd.none
             )
@@ -92,7 +92,7 @@ update message model =
         AddSlideToEnd ->
             ( { model
                 | presentation =
-                    appendSlide
+                    onAppendSlide
                         (List.last model.presentation)
                         model.presentation
               }
@@ -100,13 +100,16 @@ update message model =
             )
 
 
-moveSlideUp : Slide -> Presentation -> Presentation
-moveSlideUp slide presentation =
-    swapSlides (Model.previousSlide slide presentation) (Just slide) presentation
+onSlideUp : Slide -> Presentation -> Presentation
+onSlideUp slide presentation =
+    swapSlides
+        (Model.previousSlide slide presentation)
+        (Just slide)
+        presentation
 
 
-moveSlideDown : Slide -> Presentation -> Presentation
-moveSlideDown slide presentation =
+onSlideDown : Slide -> Presentation -> Presentation
+onSlideDown slide presentation =
     swapSlides (Model.nextSlide slide presentation) (Just slide) presentation
 
 
@@ -143,48 +146,48 @@ updateSlideAt slide =
     List.updateIf <| \s -> slide.order == s.order
 
 
-makeSlideEditable : Slide -> Slide
-makeSlideEditable slide =
+makeEditable : Slide -> Slide
+makeEditable slide =
     { slide | mode = Model.Edit, editText = slide.text }
 
 
-makeEditable : Slide -> Presentation -> Presentation
-makeEditable slide presentation =
-    updateSlideAt slide makeSlideEditable presentation
+onEditSlide : Slide -> Presentation -> Presentation
+onEditSlide slide presentation =
+    updateSlideAt slide makeEditable presentation
 
 
-updateEditSlide : String -> Slide -> Slide
-updateEditSlide string slide =
+updateEditText : String -> Slide -> Slide
+updateEditText string slide =
     { slide | editText = string }
 
 
-updateEditText : String -> Slide -> Presentation -> Presentation
-updateEditText newEditText slide presentation =
-    updateSlideAt slide (updateEditSlide newEditText) presentation
+onSlideTextChanged : String -> Slide -> Presentation -> Presentation
+onSlideTextChanged newEditText slide presentation =
+    updateSlideAt slide (updateEditText newEditText) presentation
 
 
-onSaveSlide : Slide -> Slide
-onSaveSlide slide =
+saveSlide : Slide -> Slide
+saveSlide slide =
     { slide | mode = Model.Display, text = slide.editText }
 
 
-saveSlide : Slide -> Presentation -> Presentation
-saveSlide slide presentation =
-    updateSlideAt slide onSaveSlide presentation
+onSaveSlide : Slide -> Presentation -> Presentation
+onSaveSlide slide presentation =
+    updateSlideAt slide saveSlide presentation
 
 
-onCancelSlide : Slide -> Slide
-onCancelSlide slide =
+cancelSlide : Slide -> Slide
+cancelSlide slide =
     { slide | mode = Model.Display }
 
 
-cancelSlide : Slide -> Presentation -> Presentation
-cancelSlide slide presentation =
-    updateSlideAt slide onCancelSlide presentation
+onCancelSlide : Slide -> Presentation -> Presentation
+onCancelSlide slide presentation =
+    updateSlideAt slide cancelSlide presentation
 
 
-appendSlide : Maybe Slide -> Presentation -> Presentation
-appendSlide slide presentation =
+onAppendSlide : Maybe Slide -> Presentation -> Presentation
+onAppendSlide slide presentation =
     let
         increaseFunction =
             Maybe.map .order slide
