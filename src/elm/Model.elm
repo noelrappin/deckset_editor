@@ -1,4 +1,4 @@
-module Model exposing (Mode(..), Model, Presentation, Slide, appendSlide, cancelSlide, isNextAfter, isPreviousTo, makeEditable, nextSlide, presentationInOrder, presentationToString, previousSlide, saveSlide, slideFromIntAndText, textToPresentation, updateEditText)
+module Model exposing (Mode(..), Model, Presentation, Slide, isNextAfter, isPreviousTo, newSlideAfter, nextSlide, presentationInOrder, presentationToString, previousSlide, slideFromIntAndText, textToPresentation)
 
 import Debug
 import List.Extra as List
@@ -78,57 +78,6 @@ isNextAfter targetSlide testSlide =
     testSlide.order == (targetSlide.order + 1)
 
 
-makeEditable : Slide -> Presentation -> Presentation
-makeEditable slide presentation =
-    presentation
-        |> List.updateAt slide.order
-            (\s ->
-                { s
-                    | mode = Edit
-                    , editText = s.text
-                }
-            )
-
-
-updateEditText : Slide -> String -> Presentation -> Presentation
-updateEditText slide newEditText presentation =
-    presentation
-        |> List.updateAt slide.order
-            (\s -> { s | editText = newEditText })
-
-
-saveSlide : Slide -> Presentation -> Presentation
-saveSlide slide presentation =
-    presentation
-        |> List.updateAt slide.order
-            (\s ->
-                { s
-                    | mode = Display
-                    , text = s.editText
-                }
-            )
-
-
-cancelSlide : Slide -> Presentation -> Presentation
-cancelSlide slide presentation =
-    presentation
-        |> List.updateAt slide.order
-            (\s -> { s | mode = Display })
-
-
-appendSlide : Maybe Slide -> Presentation -> Presentation
-appendSlide slide presentation =
-    let
-        increaseFunction =
-            Maybe.map .order slide
-                |> increaseOrderIfAfter
-    in
-    presentation
-        |> List.map increaseFunction
-        |> List.append [ newSlideAfter slide ]
-        |> List.sortBy .order
-
-
 newSlideAfter : Maybe Slide -> Slide
 newSlideAfter slide =
     { text = ""
@@ -142,12 +91,3 @@ newSlideAfter slide =
     , mode = Edit
     , editText = ""
     }
-
-
-increaseOrderIfAfter : Maybe Int -> Slide -> Slide
-increaseOrderIfAfter index slide =
-    if slide.order > Maybe.withDefault -1 index then
-        { slide | order = slide.order + 1 }
-
-    else
-        slide

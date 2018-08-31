@@ -38,7 +38,7 @@ update message model =
 
         EditSlide slide ->
             ( { model
-                | presentation = Model.makeEditable slide model.presentation
+                | presentation = makeEditable slide model.presentation
               }
             , Cmd.none
             )
@@ -61,21 +61,21 @@ update message model =
 
         SlideTextChanged slide string ->
             ( { model
-                | presentation = Model.updateEditText slide string model.presentation
+                | presentation = updateEditText slide string model.presentation
               }
             , Cmd.none
             )
 
         SaveSlide slide ->
             ( { model
-                | presentation = Model.saveSlide slide model.presentation
+                | presentation = saveSlide slide model.presentation
               }
             , Cmd.none
             )
 
         CancelSlide slide ->
             ( { model
-                | presentation = Model.cancelSlide slide model.presentation
+                | presentation = cancelSlide slide model.presentation
               }
             , Cmd.none
             )
@@ -83,7 +83,7 @@ update message model =
         AppendSlide slide ->
             ( { model
                 | presentation =
-                    Model.appendSlide (Just slide) model.presentation
+                    appendSlide (Just slide) model.presentation
               }
             , Cmd.none
             )
@@ -91,7 +91,7 @@ update message model =
         AddSlideToEnd ->
             ( { model
                 | presentation =
-                    Model.appendSlide
+                    appendSlide
                         (List.last model.presentation)
                         model.presentation
               }
@@ -132,6 +132,66 @@ swapOrder a b slide =
 
     else if slide.order == b then
         { slide | order = a }
+
+    else
+        slide
+
+
+makeEditable : Slide -> Presentation -> Presentation
+makeEditable slide presentation =
+    presentation
+        |> List.updateAt slide.order
+            (\s ->
+                { s
+                    | mode = Model.Edit
+                    , editText = s.text
+                }
+            )
+
+
+updateEditText : Slide -> String -> Presentation -> Presentation
+updateEditText slide newEditText presentation =
+    presentation
+        |> List.updateAt slide.order
+            (\s -> { s | editText = newEditText })
+
+
+saveSlide : Slide -> Presentation -> Presentation
+saveSlide slide presentation =
+    presentation
+        |> List.updateAt slide.order
+            (\s ->
+                { s
+                    | mode = Model.Display
+                    , text = s.editText
+                }
+            )
+
+
+cancelSlide : Slide -> Presentation -> Presentation
+cancelSlide slide presentation =
+    presentation
+        |> List.updateAt slide.order
+            (\s -> { s | mode = Model.Display })
+
+
+appendSlide : Maybe Slide -> Presentation -> Presentation
+appendSlide slide presentation =
+    let
+        increaseFunction =
+            Maybe.map .order slide
+                |> increaseOrderIfAfter
+    in
+    presentation
+        |> List.map increaseFunction
+        |> List.append [ Model.newSlideAfter slide ]
+        |> List.sortBy .order
+
+
+increaseOrderIfAfter : Maybe Int -> Slide -> Slide
+increaseOrderIfAfter index slide =
+    if slide.order > Maybe.withDefault -1 index then
+        { slide | order = slide.order + 1 }
 
     else
         slide
