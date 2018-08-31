@@ -1,5 +1,6 @@
 module View exposing (slideToBox, view)
 
+import Bulma.Columns as BColumns exposing (columnsModifiers)
 import Bulma.Elements as BElements exposing (buttonModifiers)
 import Bulma.Form as BForm
 import Bulma.Layout as BLayout
@@ -23,18 +24,31 @@ primaryButton caption =
     BElements.button primaryButtonModifiers [] [ text caption ]
 
 
+multilineColumnsModifiers : BColumns.ColumnsModifiers
+multilineColumnsModifiers =
+    { columnsModifiers | multiline = True }
+
+
+slideBoxes : Presentation -> List (Html Message)
+slideBoxes presentation =
+    List.map slideToBox <|
+        Model.presentationInOrder presentation
+
+
 view : Model -> Html Message
 view model =
     div []
-        [ div
+        [ BColumns.columns multilineColumnsModifiers
             []
           <|
-            List.map slideToBox <|
-                Model.presentationInOrder model.presentation
-        , Html.br [] []
-        , div
-            [ onClick Update.AddSlideToEnd ]
-            [ primaryButton "+" ]
+            slideBoxes model.presentation
+                ++ [ BColumns.column BColumns.columnModifiers
+                        [ class "is-one-quarter" ]
+                        [ div
+                            [ onClick Update.AddSlideToEnd ]
+                            [ primaryButton "+" ]
+                        ]
+                   ]
         , Html.br [] []
         , BLayout.level [ class "is-mobile" ]
             [ BLayout.levelLeft []
@@ -53,9 +67,12 @@ view model =
 
 slideToBox : Slide -> BElements.Box Message
 slideToBox slide =
-    BElements.box
-        [ attribute "data-row" (String.fromInt slide.order) ]
-        [ boxContents slide ]
+    BColumns.column BColumns.columnModifiers
+        [ class "is-one-quarter" ]
+        [ BElements.box
+            [ attribute "data-row" <| String.fromInt slide.order ]
+            [ boxContents slide ]
+        ]
 
 
 boxContents : Slide -> Html Message
