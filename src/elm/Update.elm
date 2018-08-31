@@ -23,60 +23,12 @@ type Message
 update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
-        SlideUp slide ->
+        AddSlideToEnd ->
             ( { model
-                | presentation = onSlideUp slide model.presentation
-              }
-            , Cmd.none
-            )
-
-        SlideDown slide ->
-            ( { model
-                | presentation = onSlideDown slide model.presentation
-              }
-            , Cmd.none
-            )
-
-        EditSlide slide ->
-            ( { model
-                | presentation = onEditSlide slide model.presentation
-              }
-            , Cmd.none
-            )
-
-        OpenFileDialog ->
-            ( model, Ports.openFileDialog () )
-
-        LoadPresentation string ->
-            ( { model
-                | presentation = Model.textToPresentation string
-              }
-            , Cmd.none
-            )
-
-        SavePresentation ->
-            ( model
-            , Ports.savePresentationText
-                (Model.presentationToString model.presentation)
-            )
-
-        SlideTextChanged slide string ->
-            ( { model
-                | presentation = onSlideTextChanged string slide model.presentation
-              }
-            , Cmd.none
-            )
-
-        SaveSlide slide ->
-            ( { model
-                | presentation = onSaveSlide slide model.presentation
-              }
-            , Cmd.none
-            )
-
-        CancelSlide slide ->
-            ( { model
-                | presentation = onCancelSlide slide model.presentation
+                | presentation =
+                    onAppendSlide
+                        (List.last model.presentation)
+                        model.presentation
               }
             , Cmd.none
             )
@@ -89,12 +41,60 @@ update message model =
             , Cmd.none
             )
 
-        AddSlideToEnd ->
+        CancelSlide slide ->
             ( { model
-                | presentation =
-                    onAppendSlide
-                        (List.last model.presentation)
-                        model.presentation
+                | presentation = onCancelSlide slide model.presentation
+              }
+            , Cmd.none
+            )
+
+        EditSlide slide ->
+            ( { model
+                | presentation = onEditSlide slide model.presentation
+              }
+            , Cmd.none
+            )
+
+        LoadPresentation string ->
+            ( { model
+                | presentation = Model.textToPresentation string
+              }
+            , Cmd.none
+            )
+
+        OpenFileDialog ->
+            ( model, Ports.openFileDialog () )
+
+        SavePresentation ->
+            ( model
+            , Ports.savePresentationText
+                (Model.presentationToString model.presentation)
+            )
+
+        SaveSlide slide ->
+            ( { model
+                | presentation = onSaveSlide slide model.presentation
+              }
+            , Cmd.none
+            )
+
+        SlideDown slide ->
+            ( { model
+                | presentation = onSlideDown slide model.presentation
+              }
+            , Cmd.none
+            )
+
+        SlideTextChanged slide string ->
+            ( { model
+                | presentation = onSlideTextChanged string slide model.presentation
+              }
+            , Cmd.none
+            )
+
+        SlideUp slide ->
+            ( { model
+                | presentation = onSlideUp slide model.presentation
               }
             , Cmd.none
             )
