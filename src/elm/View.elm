@@ -115,6 +115,9 @@ displayModeContents slide =
                     [ onClick (Update.EditSlide slide) ]
                     [ text "Edit" ]
                 , BLayout.levelItem
+                    [ onClick (Update.RemoveSlide slide) ]
+                    [ text "Remove" ]
+                , BLayout.levelItem
                     [ onClick (Update.AppendSlide slide) ]
                     [ text "Append" ]
                 ]

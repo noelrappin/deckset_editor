@@ -13,6 +13,7 @@ type Message
     | EditSlide Slide
     | LoadPresentation String
     | OpenFileDialog
+    | RemoveSlide Slide
     | SavePresentation
     | SaveSlide Slide
     | SlideDown Slide
@@ -64,6 +65,13 @@ update message model =
 
         OpenFileDialog ->
             ( model, Ports.openFileDialog () )
+
+        RemoveSlide slide ->
+            ( { model
+                | presentation = onRemoveSlide slide model.presentation
+              }
+            , Cmd.none
+            )
 
         SavePresentation ->
             ( model
@@ -206,3 +214,19 @@ increaseOrderIfAfter index slide =
 
     else
         slide
+
+
+decreaseOrderIfAfter : Int -> Slide -> Slide
+decreaseOrderIfAfter index slide =
+    if slide.order > index then
+        { slide | order = slide.order - 1 }
+
+    else
+        slide
+
+
+onRemoveSlide : Slide -> Presentation -> Presentation
+onRemoveSlide slide presentation =
+    presentation
+        |> List.filter (\s -> s.order /= slide.order)
+        |> List.map (\s -> decreaseOrderIfAfter slide.order s)
