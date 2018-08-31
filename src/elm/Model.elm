@@ -1,5 +1,6 @@
 module Model exposing (Mode(..), Model, Presentation, Slide, appendSlide, cancelSlide, isNextAfter, isPreviousTo, makeEditable, nextSlide, presentationInOrder, presentationToString, previousSlide, saveSlide, slideFromIntAndText, textToPresentation, updateEditText)
 
+import Debug
 import List.Extra as List
 import Tuple
 
@@ -115,26 +116,37 @@ cancelSlide slide presentation =
             (\s -> { s | mode = Display })
 
 
-appendSlide : Slide -> Presentation -> Presentation
+appendSlide : Maybe Slide -> Presentation -> Presentation
 appendSlide slide presentation =
+    let
+        increaseFunction =
+            Maybe.map .order slide
+                |> increaseOrderIfAfter
+    in
     presentation
-        |> List.map (increaseOrderIfAfter slide.order)
+        |> List.map increaseFunction
         |> List.append [ newSlideAfter slide ]
         |> List.sortBy .order
 
 
-newSlideAfter : Slide -> Slide
+newSlideAfter : Maybe Slide -> Slide
 newSlideAfter slide =
     { text = ""
-    , order = slide.order + 1
+    , order =
+        case slide of
+            Nothing ->
+                0
+
+            Just s ->
+                s.order + 1
     , mode = Edit
     , editText = ""
     }
 
 
-increaseOrderIfAfter : Int -> Slide -> Slide
+increaseOrderIfAfter : Maybe Int -> Slide -> Slide
 increaseOrderIfAfter index slide =
-    if slide.order > index then
+    if slide.order > Maybe.withDefault -1 index then
         { slide | order = slide.order + 1 }
 
     else

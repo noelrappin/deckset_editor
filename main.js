@@ -28,9 +28,3 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (mainWindow === null) { createWindow() }
 })
-
-// var elmApp = Elm.Main.init({node: document.getElementById('container')});
-// elmApp.ports.savePresentationText.subscribe(str => {
-//   console.log(str)
-// })
-

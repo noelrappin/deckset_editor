@@ -5,7 +5,7 @@ import Bulma.Form as BForm
 import Bulma.Layout as BLayout
 import Bulma.Modifiers as BModifiers
 import Html exposing (Html, div, h1, p, text)
-import Html.Attributes exposing (class, style, value)
+import Html.Attributes exposing (attribute, class, style, value)
 import Html.Events exposing (onClick, onInput)
 import Markdown
 import Model exposing (Model, Presentation, Slide)
@@ -26,10 +26,15 @@ primaryButton caption =
 view : Model -> Html Message
 view model =
     div []
-        [ div []
-            (Model.presentationInOrder model.presentation
-                |> List.map slideToBox
-            )
+        [ div
+            []
+          <|
+            List.map slideToBox <|
+                Model.presentationInOrder model.presentation
+        , Html.br [] []
+        , div
+            [ onClick Update.AddSlideToEnd ]
+            [ primaryButton "+" ]
         , Html.br [] []
         , BLayout.level [ class "is-mobile" ]
             [ BLayout.levelLeft []
@@ -48,7 +53,9 @@ view model =
 
 slideToBox : Slide -> BElements.Box Message
 slideToBox slide =
-    BElements.box [] [ boxContents slide ]
+    BElements.box
+        [ attribute "data-row" (String.fromInt slide.order) ]
+        [ boxContents slide ]
 
 
 boxContents : Slide -> Html Message

@@ -1,11 +1,13 @@
 module Update exposing (Message(..), moveSlideDown, moveSlideUp, swapOrder, swapSlides, update)
 
+import List.Extra as List
 import Model exposing (Model, Presentation, Slide)
 import Ports
 
 
 type Message
-    = AppendSlide Slide
+    = AddSlideToEnd
+    | AppendSlide Slide
     | CancelSlide Slide
     | EditSlide Slide
     | LoadPresentation String
@@ -80,7 +82,18 @@ update message model =
 
         AppendSlide slide ->
             ( { model
-                | presentation = Model.appendSlide slide model.presentation
+                | presentation =
+                    Model.appendSlide (Just slide) model.presentation
+              }
+            , Cmd.none
+            )
+
+        AddSlideToEnd ->
+            ( { model
+                | presentation =
+                    Model.appendSlide
+                        (List.last model.presentation)
+                        model.presentation
               }
             , Cmd.none
             )
