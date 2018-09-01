@@ -95,6 +95,19 @@ boxContents slide =
             editModeContents slide
 
 
+editButtonModifiers : BElements.ButtonModifiers msg
+editButtonModifiers =
+    { buttonModifiers
+        | color = BModifiers.Light
+        , size = BModifiers.Small
+    }
+
+
+editButton : Message -> String -> Html Message
+editButton message caption =
+    BElements.button editButtonModifiers [ onClick message ] [ text caption ]
+
+
 displayModeContents : Slide -> Html Message
 displayModeContents slide =
     div
@@ -103,23 +116,21 @@ displayModeContents slide =
         , BLayout.level
             [ class "is-mobile" ]
             [ BLayout.levelLeft []
-                [ BLayout.levelItem
-                    [ onClick (Update.SlideUp slide) ]
-                    [ text "Up" ]
-                , BLayout.levelItem
-                    [ onClick (Update.SlideDown slide) ]
-                    [ text "Down" ]
+                [ BElements.buttons
+                    BModifiers.Left
+                    [ class "has-addons" ]
+                    [ editButton (Update.SlideUp slide) "⬆️"
+                    , editButton (Update.SlideDown slide) "⬇️"
+                    ]
                 ]
             , BLayout.levelRight []
-                [ BLayout.levelItem
-                    [ onClick (Update.EditSlide slide) ]
-                    [ text "Edit" ]
-                , BLayout.levelItem
-                    [ onClick (Update.RemoveSlide slide) ]
-                    [ text "Remove" ]
-                , BLayout.levelItem
-                    [ onClick (Update.AppendSlide slide) ]
-                    [ text "Append" ]
+                [ BElements.buttons
+                    BModifiers.Right
+                    [ class "has-addons" ]
+                    [ editButton (Update.EditSlide slide) "✏️"
+                    , editButton (Update.RemoveSlide slide) "🗑"
+                    , editButton (Update.AppendSlide slide) "➕"
+                    ]
                 ]
             ]
         ]
@@ -139,20 +150,20 @@ editModeContents slide =
         , BLayout.level
             [ class "is-mobile" ]
             [ BLayout.levelLeft []
-                [ BLayout.levelItem
-                    [ onClick (Update.SlideUp slide) ]
-                    [ text "Up" ]
+                [ BElements.buttons
+                    BModifiers.Left
+                    [ class "has-addons" ]
+                    [ editButton (Update.SlideUp slide) "⬆️"
+                    , editButton (Update.SlideDown slide) "⬇️"
+                    ]
                 ]
-            , BLayout.levelItem
-                [ onClick (Update.SaveSlide slide) ]
-                [ text "Save" ]
-            , BLayout.levelItem
-                [ onClick (Update.CancelSlide slide) ]
-                [ text "Cancel" ]
             , BLayout.levelRight []
-                [ BLayout.levelItem
-                    [ onClick (Update.SlideDown slide) ]
-                    [ text "Down" ]
+                [ BElements.buttons
+                    BModifiers.Right
+                    [ class "has-addons" ]
+                    [ editButton (Update.SaveSlide slide) "💾"
+                    , editButton (Update.CancelSlide slide) "🚫"
+                    ]
                 ]
             ]
         ]
