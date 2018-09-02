@@ -10,7 +10,7 @@ import View exposing (view)
 
 init : () -> ( Model, Cmd Message )
 init _ =
-    ( { presentation = [] }, Cmd.none )
+    ( { presentation = [], filename = "", clean = True }, Cmd.none )
 
 
 subscriptions : Model -> Sub Message

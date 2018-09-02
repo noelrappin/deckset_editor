@@ -15,11 +15,12 @@
     </section>
     <script>
       const {dialog} = require('electron').remote
+      var currentWindow = require('electron').remote.getCurrentWindow()
       var fs = require("fs")
-      var elmApp = Elm.Main.init({node: document.getElementById('container')});
+      var elmApp = Elm.Main.init({node: document.getElementById('container')})
 
       elmApp.ports.savePresentationText.subscribe(str => {
-        console.log(str)
+        // console.log(str)
         dialog.showSaveDialog((filename) => {
           if (filename === undefined) {
             console.log("oops")
@@ -40,15 +41,19 @@
             console.log("No file selected")
             return
           }
-          fs.readFile(fileNames[0], 'utf-8', (err, data) => {
+          var filename = fileNames[0]
+          fs.readFile(fileNames[0], 'utf-8', (err, body) => {
             if(err){
                 alert("An error ocurred reading the file :" + err.message)
                 return;
             }
-            elmApp.ports.loadPresentationText.send(data)
+            elmApp.ports.loadPresentationText.send({filename, body})
           })
         })
+      })
 
+      elmApp.ports.updateWindowTitle.subscribe(title => {
+        currentWindow.setTitle(title)
       })
     </script>
   </body>

@@ -1,6 +1,25 @@
-module Model exposing (Mode(..), Model, Presentation, Slide, isNextAfter, isPreviousTo, newSlideAfter, nextSlide, presentationInOrder, presentationToString, previousSlide, slideFromIntAndText, textToPresentation)
+module Model exposing
+    ( Mode(..)
+    , Model
+    , Presentation
+    , Slide
+    , isNextAfter
+    , isPreviousTo
+    , loadFromValue
+    , newSlideAfter
+    , nextSlide
+    , presentationInOrder
+    , presentationToString
+    , previousSlide
+    , slideFromIntAndText
+    , textToPresentation
+    , windowTitle
+    )
 
 import Debug
+import Json.Decode as Decode exposing (Decoder, float, int, string)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
+import Json.Encode exposing (Value)
 import List.Extra as List
 import Tuple
 
@@ -18,12 +37,51 @@ type alias Slide =
     }
 
 
+type alias FileImport =
+    { filename : String
+    , body : String
+    }
+
+
 type alias Presentation =
     List Slide
 
 
 type alias Model =
-    { presentation : Presentation }
+    { presentation : Presentation
+    , filename : String
+    , clean : Bool
+    }
+
+
+fileImportDecoder : Decoder FileImport
+fileImportDecoder =
+    Decode.succeed FileImport
+        |> required "filename" string
+        |> required "body" string
+
+
+decodeFileImport : Value -> Result Decode.Error FileImport
+decodeFileImport value =
+    Decode.decodeValue fileImportDecoder value
+
+
+loadFromValue : Value -> Model -> Model
+loadFromValue value model =
+    case decodeFileImport value of
+        Ok fileImport ->
+            loadFromImport fileImport model
+
+        Result.Err error ->
+            model
+
+
+loadFromImport : FileImport -> Model -> Model
+loadFromImport fileImport model =
+    { model
+        | presentation = textToPresentation fileImport.body
+        , filename = fileImport.filename
+    }
 
 
 slideFromIntAndText : Int -> String -> Slide
@@ -91,3 +149,8 @@ newSlideAfter slide =
     , mode = Edit
     , editText = ""
     }
+
+
+windowTitle : Model -> String
+windowTitle model =
+    "Deckset Editor: " ++ model.filename

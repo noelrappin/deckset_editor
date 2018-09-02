@@ -1,6 +1,7 @@
 module Update exposing (Message(..), update)
 
 import Debug
+import Json.Encode exposing (Value)
 import List.Extra as List
 import Model exposing (Model, Presentation, Slide)
 import Ports
@@ -11,7 +12,7 @@ type Message
     | AppendSlide Slide
     | CancelSlide Slide
     | EditSlide Slide
-    | LoadPresentation String
+    | LoadPresentation Value
     | OpenFileDialog
     | RemoveSlide Slide
     | SavePresentation
@@ -19,6 +20,7 @@ type Message
     | SlideDown Slide
     | SlideTextChanged Slide String
     | SlideUp Slide
+    | UpdateWindowTitle
 
 
 update : Message -> Model -> ( Model, Cmd Message )
@@ -56,12 +58,9 @@ update message model =
             , Cmd.none
             )
 
-        LoadPresentation string ->
-            ( { model
-                | presentation = Model.textToPresentation string
-              }
-            , Cmd.none
-            )
+        LoadPresentation value ->
+            Model.loadFromValue value model
+                |> update UpdateWindowTitle
 
         OpenFileDialog ->
             ( model, Ports.openFileDialog () )
@@ -106,6 +105,9 @@ update message model =
               }
             , Cmd.none
             )
+
+        UpdateWindowTitle ->
+            ( model, Ports.updateWindowTitle (Model.windowTitle model) )
 
 
 onSlideUp : Slide -> Presentation -> Presentation
