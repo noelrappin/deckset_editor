@@ -20,6 +20,7 @@ type Message
     | SlideDown Slide
     | SlideTextChanged Slide String
     | SlideUp Slide
+    | UpdateFileName Value
     | UpdateWindowTitle
 
 
@@ -75,7 +76,7 @@ update message model =
         SavePresentation ->
             ( model
             , Ports.savePresentationText
-                (Model.presentationToString model.presentation)
+                (Model.encodeFileInfo model)
             )
 
         SaveSlide slide ->
@@ -105,6 +106,10 @@ update message model =
               }
             , Cmd.none
             )
+
+        UpdateFileName filename ->
+            Model.updateFilename filename model
+                |> update UpdateWindowTitle
 
         UpdateWindowTitle ->
             ( model, Ports.updateWindowTitle (Model.windowTitle model) )

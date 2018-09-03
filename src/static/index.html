@@ -19,20 +19,32 @@
       var fs = require("fs")
       var elmApp = Elm.Main.init({node: document.getElementById('container')})
 
-      elmApp.ports.savePresentationText.subscribe(str => {
-        // console.log(str)
-        dialog.showSaveDialog((filename) => {
-          if (filename === undefined) {
-            console.log("oops")
-            return
-          }
-          fs.writeFile(filename, str, (err) => {
-            if (err) {
-              console.log(err)
+      elmApp.ports.savePresentationText.subscribe(data => {
+        console.log(data)
+        if (data.filename === "") {
+          dialog.showSaveDialog((filename) => {
+            if (filename === undefined) {
+              console.log("oops")
               return
             }
+            fs.writeFile(filename, data.body, (err) => {
+              if (err) {
+                console.log(err)
+                return
+              } else {
+                elmApp.ports.updateFileName.send(filename)
+              }
+            })
           })
-        })
+        } else {
+          fs.writeFile(data.filename, data.body, (err) => {
+            if (err) {
+              console.log(err)
+                return
+            }
+          })
+
+        }
       })
 
       elmApp.ports.openFileDialog.subscribe(() => {

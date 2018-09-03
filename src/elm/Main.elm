@@ -15,7 +15,10 @@ init _ =
 
 subscriptions : Model -> Sub Message
 subscriptions model =
-    Ports.loadPresentationText Update.LoadPresentation
+    Sub.batch
+        [ Ports.loadPresentationText Update.LoadPresentation
+        , Ports.updateFileName Update.UpdateFileName
+        ]
 
 
 main : Program () Model Message

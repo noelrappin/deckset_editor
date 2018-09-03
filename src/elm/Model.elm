@@ -3,6 +3,7 @@ module Model exposing
     , Model
     , Presentation
     , Slide
+    , encodeFileInfo
     , isNextAfter
     , isPreviousTo
     , loadFromValue
@@ -13,13 +14,14 @@ module Model exposing
     , previousSlide
     , slideFromIntAndText
     , textToPresentation
+    , updateFilename
     , windowTitle
     )
 
 import Debug
 import Json.Decode as Decode exposing (Decoder, float, int, string)
 import Json.Decode.Pipeline exposing (hardcoded, optional, required)
-import Json.Encode exposing (Value)
+import Json.Encode as Encode exposing (Value)
 import List.Extra as List
 import Tuple
 
@@ -109,7 +111,7 @@ presentationToString : Presentation -> String
 presentationToString presentation =
     presentationInOrder presentation
         |> List.map .text
-        |> String.join "\n---\n"
+        |> String.join "\n\n---\n\n"
 
 
 previousSlide : Slide -> Presentation -> Maybe Slide
@@ -154,3 +156,27 @@ newSlideAfter slide =
 windowTitle : Model -> String
 windowTitle model =
     "Deckset Editor: " ++ model.filename
+
+
+encodeFileInfo : Model -> Value
+encodeFileInfo model =
+    Encode.object
+        [ ( "filename", Encode.string model.filename )
+        , ( "body"
+          , Encode.string <| presentationToString model.presentation
+          )
+        ]
+
+
+updateFilename : Value -> Model -> Model
+updateFilename filenameValue model =
+    let
+        result =
+            Decode.decodeValue Decode.string filenameValue
+    in
+    case result of
+        Ok filename ->
+            { model | filename = filename }
+
+        Err _ ->
+            model
