@@ -1,6 +1,7 @@
 module Update exposing (Message(..), update)
 
 import Debug
+import Html5.DragDrop as DragDrop
 import Json.Encode exposing (Value)
 import List.Extra as List
 import Model exposing (Model, Presentation, Slide)
@@ -11,6 +12,7 @@ type Message
     = AddSlideToEnd
     | AppendSlide Slide
     | CancelSlide Slide
+    | DragDropMsg (DragDrop.Msg Model.Order Model.Order)
     | EditSlide Slide
     | LoadPresentation Value
     | OpenFileDialog
@@ -51,6 +53,9 @@ update message model =
               }
             , Cmd.none
             )
+
+        DragDropMsg dragDropMessage ->
+            ( onDragDrop dragDropMessage model, Cmd.none )
 
         EditSlide slide ->
             ( { model
@@ -237,3 +242,55 @@ onRemoveSlide slide presentation =
     presentation
         |> List.filter (\s -> s.order /= slide.order)
         |> List.map (\s -> decreaseOrderIfAfter slide.order s)
+
+
+onDragDrop : DragDrop.Msg Model.Order Model.Order -> Model -> Model
+onDragDrop dragDropMessage model =
+    let
+        ( dragModel, dragResult ) =
+            DragDrop.update dragDropMessage model.dragDrop
+    in
+    { model
+        | dragDrop = dragModel
+        , presentation = dragPresentation dragResult model.presentation
+    }
+
+
+dragPresentation : Model.DragResult -> Presentation -> Presentation
+dragPresentation result presentation =
+    case result of
+        Nothing ->
+            presentation
+
+        Just ( dragOrder, dropOrder, position ) ->
+            List.map
+                (updateSlideOnDrag
+                    (Debug.log "drag" dragOrder)
+                    (Debug.log "drop" dropOrder)
+                )
+                presentation
+
+
+updateSlideOnDrag : Model.Order -> Model.Order -> Model.Slide -> Model.Slide
+updateSlideOnDrag dragOrder dropOrder slide =
+    if slide.order == dragOrder then
+        { slide | order = Debug.log "equal" dropOrder }
+
+    else
+        case compare dragOrder dropOrder of
+            LT ->
+                if slide.order > dragOrder && slide.order <= dropOrder then
+                    { slide | order = slide.order - 1 }
+
+                else
+                    slide
+
+            GT ->
+                if slide.order < dragOrder && slide.order >= dropOrder then
+                    { slide | order = slide.order + 1 }
+
+                else
+                    slide
+
+            EQ ->
+                slide

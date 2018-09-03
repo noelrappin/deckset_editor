@@ -1,6 +1,8 @@
 module Model exposing
-    ( Mode(..)
+    ( DragResult
+    , Mode(..)
     , Model
+    , Order
     , Presentation
     , Slide
     , encodeFileInfo
@@ -19,6 +21,7 @@ module Model exposing
     )
 
 import Debug
+import Html5.DragDrop as DragDrop
 import Json.Decode as Decode exposing (Decoder, float, int, string)
 import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as Encode exposing (Value)
@@ -31,9 +34,13 @@ type Mode
     | Edit
 
 
+type alias Order =
+    Int
+
+
 type alias Slide =
     { text : String
-    , order : Int
+    , order : Order
     , mode : Mode
     , editText : String
     }
@@ -49,10 +56,15 @@ type alias Presentation =
     List Slide
 
 
+type alias DragResult =
+    Maybe ( Order, Order, DragDrop.Position )
+
+
 type alias Model =
     { presentation : Presentation
     , filename : String
     , clean : Bool
+    , dragDrop : DragDrop.Model Order Order
     }
 
 

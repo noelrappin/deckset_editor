@@ -8,6 +8,7 @@ import Bulma.Modifiers as BModifiers
 import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (attribute, class, style, value)
 import Html.Events exposing (onClick, onInput)
+import Html5.DragDrop as DragDrop
 import Markdown
 import Model exposing (Model, Presentation, Slide)
 import Ports exposing (openFileDialog)
@@ -80,7 +81,10 @@ slideToBox slide =
     BColumns.column BColumns.columnModifiers
         [ class "is-one-quarter" ]
         [ BElements.box
-            [ attribute "data-row" <| String.fromInt slide.order ]
+            (DragDrop.draggable Update.DragDropMsg slide.order
+                ++ DragDrop.droppable Update.DragDropMsg slide.order
+                ++ [ attribute "data-row" <| String.fromInt slide.order ]
+            )
             [ boxContents slide ]
         ]
 

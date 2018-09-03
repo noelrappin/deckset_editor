@@ -1,6 +1,7 @@
 module Main exposing (init, main, subscriptions)
 
 import Browser
+import Html5.DragDrop as DragDrop
 import Model exposing (Model, Presentation, Slide)
 import Ports
 import String
@@ -10,7 +11,13 @@ import View exposing (view)
 
 init : () -> ( Model, Cmd Message )
 init _ =
-    ( { presentation = [], filename = "", clean = True }, Cmd.none )
+    ( { presentation = []
+      , filename = ""
+      , clean = True
+      , dragDrop = DragDrop.init
+      }
+    , Cmd.none
+    )
 
 
 subscriptions : Model -> Sub Message
