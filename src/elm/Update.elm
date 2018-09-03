@@ -274,7 +274,7 @@ dragPresentation result presentation =
 updateSlideOnDrag : Model.Order -> Model.Order -> Model.Slide -> Model.Slide
 updateSlideOnDrag dragOrder dropOrder slide =
     if slide.order == dragOrder then
-        { slide | order = Debug.log "equal" dropOrder }
+        { slide | order = dropOrder }
 
     else
         case compare dragOrder dropOrder of
