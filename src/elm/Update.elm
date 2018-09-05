@@ -30,39 +30,19 @@ update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
         AddSlideToEnd ->
-            ( { model
-                | presentation =
-                    onAppendSlide
-                        (List.last model.presentation)
-                        model.presentation
-              }
-            , Cmd.none
-            )
+            ( onAddSlideToEnd model, Cmd.none )
 
         AppendSlide slide ->
-            ( { model
-                | presentation =
-                    onAppendSlide (Just slide) model.presentation
-              }
-            , Cmd.none
-            )
+            ( onAppendSlide slide model, Cmd.none )
 
         CancelSlide slide ->
-            ( { model
-                | presentation = onCancelSlide slide model.presentation
-              }
-            , Cmd.none
-            )
+            ( onCancelSlide slide model, Cmd.none )
 
         DragDropMsg dragDropMessage ->
             ( onDragDrop dragDropMessage model, Cmd.none )
 
         EditSlide slide ->
-            ( { model
-                | presentation = onEditSlide slide model.presentation
-              }
-            , Cmd.none
-            )
+            ( onEditSlide slide model, Cmd.none )
 
         LoadPresentation value ->
             Model.loadFromValue value model
@@ -72,11 +52,7 @@ update message model =
             ( model, Ports.openFileDialog () )
 
         RemoveSlide slide ->
-            ( { model
-                | presentation = onRemoveSlide slide model.presentation
-              }
-            , Cmd.none
-            )
+            ( onRemoveSlide slide model, Cmd.none )
 
         SavePresentation ->
             ( model
@@ -85,32 +61,18 @@ update message model =
             )
 
         SaveSlide slide ->
-            ( { model
-                | presentation = onSaveSlide slide model.presentation
-              }
-            , Cmd.none
-            )
+            ( onSaveSlide slide model, Cmd.none )
 
         SlideDown slide ->
-            ( { model
-                | presentation = onSlideDown slide model.presentation
-              }
-            , Cmd.none
-            )
+            ( onSlideDown slide model, Cmd.none )
 
         SlideTextChanged slide string ->
-            ( { model
-                | presentation = onSlideTextChanged string slide model.presentation
-              }
+            ( onSlideTextChanged string slide model
             , Cmd.none
             )
 
         SlideUp slide ->
-            ( { model
-                | presentation = onSlideUp slide model.presentation
-              }
-            , Cmd.none
-            )
+            ( onSlideUp slide model, Cmd.none )
 
         UpdateFileName filename ->
             Model.updateFilename filename model
@@ -120,17 +82,26 @@ update message model =
             ( model, Ports.updateWindowTitle (Model.windowTitle model) )
 
 
-onSlideUp : Slide -> Presentation -> Presentation
-onSlideUp slide presentation =
-    swapSlides
-        (Model.previousSlide slide presentation)
-        (Just slide)
-        presentation
+onSlideUp : Slide -> Model -> Model
+onSlideUp slide model =
+    { model
+        | presentation =
+            swapSlides
+                (Model.previousSlide slide model.presentation)
+                (Just slide)
+                model.presentation
+    }
 
 
-onSlideDown : Slide -> Presentation -> Presentation
-onSlideDown slide presentation =
-    swapSlides (Model.nextSlide slide presentation) (Just slide) presentation
+onSlideDown : Slide -> Model -> Model
+onSlideDown slide model =
+    { model
+        | presentation =
+            swapSlides
+                (Model.nextSlide slide model.presentation)
+                (Just slide)
+                model.presentation
+    }
 
 
 swapSlides : Maybe Slide -> Maybe Slide -> Presentation -> Presentation
@@ -171,9 +142,11 @@ makeEditable slide =
     { slide | mode = Model.Edit, editText = slide.text }
 
 
-onEditSlide : Slide -> Presentation -> Presentation
-onEditSlide slide presentation =
-    updateSlideAt slide makeEditable presentation
+onEditSlide : Slide -> Model -> Model
+onEditSlide slide model =
+    { model
+        | presentation = updateSlideAt slide makeEditable model.presentation
+    }
 
 
 updateEditText : String -> Slide -> Slide
@@ -181,9 +154,15 @@ updateEditText string slide =
     { slide | editText = string }
 
 
-onSlideTextChanged : String -> Slide -> Presentation -> Presentation
-onSlideTextChanged newEditText slide presentation =
-    updateSlideAt slide (updateEditText newEditText) presentation
+onSlideTextChanged : String -> Slide -> Model -> Model
+onSlideTextChanged newEditText slide model =
+    { model
+        | presentation =
+            updateSlideAt
+                slide
+                (updateEditText newEditText)
+                model.presentation
+    }
 
 
 saveSlide : Slide -> Slide
@@ -191,9 +170,11 @@ saveSlide slide =
     { slide | mode = Model.Display, text = slide.editText }
 
 
-onSaveSlide : Slide -> Presentation -> Presentation
-onSaveSlide slide presentation =
-    updateSlideAt slide saveSlide presentation
+onSaveSlide : Slide -> Model -> Model
+onSaveSlide slide model =
+    { model
+        | presentation = updateSlideAt slide saveSlide model.presentation
+    }
 
 
 cancelSlide : Slide -> Slide
@@ -201,13 +182,33 @@ cancelSlide slide =
     { slide | mode = Model.Display }
 
 
-onCancelSlide : Slide -> Presentation -> Presentation
-onCancelSlide slide presentation =
-    updateSlideAt slide cancelSlide presentation
+onCancelSlide : Slide -> Model -> Model
+onCancelSlide slide model =
+    { model
+        | presentation = updateSlideAt slide cancelSlide model.presentation
+    }
 
 
-onAppendSlide : Maybe Slide -> Presentation -> Presentation
-onAppendSlide slide presentation =
+onAddSlideToEnd : Model -> Model
+onAddSlideToEnd model =
+    { model
+        | presentation =
+            appendSlideToPresentation
+                (List.last model.presentation)
+                model.presentation
+    }
+
+
+onAppendSlide : Slide -> Model -> Model
+onAppendSlide slide model =
+    { model
+        | presentation =
+            appendSlideToPresentation (Just slide) model.presentation
+    }
+
+
+appendSlideToPresentation : Maybe Slide -> Presentation -> Presentation
+appendSlideToPresentation slide presentation =
     let
         increaseFunction =
             Maybe.map .order slide
@@ -237,11 +238,23 @@ decreaseOrderIfAfter index slide =
         slide
 
 
-onRemoveSlide : Slide -> Presentation -> Presentation
-onRemoveSlide slide presentation =
+sameOrder : Int -> Slide -> Bool
+sameOrder order slide =
+    order == slide.order
+
+
+onRemoveSlide : Slide -> Model -> Model
+onRemoveSlide slide model =
+    { model
+        | presentation = removeSlideFromPresentation slide model.presentation
+    }
+
+
+removeSlideFromPresentation : Slide -> Presentation -> Presentation
+removeSlideFromPresentation slide presentation =
     presentation
-        |> List.filter (\s -> s.order /= slide.order)
-        |> List.map (\s -> decreaseOrderIfAfter slide.order s)
+        |> List.filterNot (sameOrder slide.order)
+        |> List.map (decreaseOrderIfAfter slide.order)
 
 
 onDragDrop : DragDrop.Msg Model.Order Model.Order -> Model -> Model
@@ -264,10 +277,7 @@ dragPresentation result presentation =
 
         Just ( dragOrder, dropOrder, position ) ->
             List.map
-                (updateSlideOnDrag
-                    (Debug.log "drag" dragOrder)
-                    (Debug.log "drop" dropOrder)
-                )
+                (updateSlideOnDrag dragOrder dropOrder)
                 presentation
 
 

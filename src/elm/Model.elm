@@ -6,6 +6,7 @@ module Model exposing
     , Presentation
     , Slide
     , encodeFileInfo
+    , init
     , isNextAfter
     , isPreviousTo
     , loadFromValue
@@ -27,6 +28,7 @@ import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as Encode exposing (Value)
 import List.Extra as List
 import Tuple
+import Undo exposing (UndoState)
 
 
 type Mode
@@ -65,6 +67,17 @@ type alias Model =
     , filename : String
     , clean : Bool
     , dragDrop : DragDrop.Model Order Order
+    , undoState : UndoState Presentation
+    }
+
+
+init : Model
+init =
+    { presentation = []
+    , filename = ""
+    , clean = True
+    , dragDrop = DragDrop.init
+    , undoState = Undo.initialUndoState
     }
 
 

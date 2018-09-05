@@ -11,13 +11,7 @@ import View exposing (view)
 
 init : () -> ( Model, Cmd Message )
 init _ =
-    ( { presentation = []
-      , filename = ""
-      , clean = True
-      , dragDrop = DragDrop.init
-      }
-    , Cmd.none
-    )
+    ( Model.init , Cmd.none )
 
 
 subscriptions : Model -> Sub Message
