@@ -1,11 +1,14 @@
 module Undo exposing
     ( UndoState
+    , canRedo
+    , canUndo
     , initialUndoState
     , onStateChange
     , redo
     , undo
     )
 
+import Debug
 import List
 
 

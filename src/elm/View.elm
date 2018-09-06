@@ -12,6 +12,7 @@ import Html5.DragDrop as DragDrop
 import Markdown
 import Model exposing (Model, Presentation, Slide)
 import Ports exposing (openFileDialog)
+import Undo
 import Update exposing (Message)
 
 
@@ -56,22 +57,41 @@ view model =
     div []
         [ displayPresentationSlides model.presentation
         , Html.br [] []
-        , viewFooter
+        , viewFooter model
         ]
 
 
-viewFooter : Html Message
-viewFooter =
+showIf : Bool -> Html.Attribute msg
+showIf boolean =
+    if boolean then
+        class ""
+
+    else
+        BModifiers.invisible
+
+
+viewFooter : Model -> Html Message
+viewFooter model =
     BLayout.level [ class "is-mobile" ]
         [ BLayout.levelLeft []
             [ BLayout.levelItem
                 [ onClick Update.OpenFileDialog ]
                 [ primaryButton "Open Document" ]
+            , BLayout.levelItem
+                [ onClick Update.SavePresentation ]
+                [ primaryButton "Save Document" ]
             ]
         , BLayout.levelRight []
             [ BLayout.levelItem
-                [ onClick Update.SavePresentation ]
-                [ primaryButton "Save Document" ]
+                [ onClick Update.Undo
+                , showIf (Undo.canUndo model.undoState)
+                ]
+                [ primaryButton "Undo" ]
+            , BLayout.levelItem
+                [ onClick Update.Redo
+                , showIf (Undo.canRedo model.undoState)
+                ]
+                [ primaryButton "Redo" ]
             ]
         ]
 

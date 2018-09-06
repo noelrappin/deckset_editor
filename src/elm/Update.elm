@@ -6,6 +6,7 @@ import Json.Encode exposing (Value)
 import List.Extra as List
 import Model exposing (Model, Presentation, Slide)
 import Ports
+import Undo
 
 
 type Message
@@ -16,12 +17,14 @@ type Message
     | EditSlide Slide
     | LoadPresentation Value
     | OpenFileDialog
+    | Redo
     | RemoveSlide Slide
     | SavePresentation
     | SaveSlide Slide
     | SlideDown Slide
     | SlideTextChanged Slide String
     | SlideUp Slide
+    | Undo
     | UpdateFileName Value
     | UpdateWindowTitle
 
@@ -30,29 +33,34 @@ update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
         AddSlideToEnd ->
-            ( onAddSlideToEnd model, Cmd.none )
+            ( onAddSlideToEnd model |> onStateChange, Cmd.none )
 
         AppendSlide slide ->
-            ( onAppendSlide slide model, Cmd.none )
+            ( onAppendSlide slide model |> onStateChange, Cmd.none )
 
         CancelSlide slide ->
             ( onCancelSlide slide model, Cmd.none )
 
         DragDropMsg dragDropMessage ->
-            ( onDragDrop dragDropMessage model, Cmd.none )
+            ( onDragDrop dragDropMessage model |> onStateChange, Cmd.none )
 
         EditSlide slide ->
             ( onEditSlide slide model, Cmd.none )
 
         LoadPresentation value ->
             Model.loadFromValue value model
+                |> onStateReset
+                |> onStateChange
                 |> update UpdateWindowTitle
 
         OpenFileDialog ->
             ( model, Ports.openFileDialog () )
 
+        Redo ->
+            ( onRedo model, Cmd.none )
+
         RemoveSlide slide ->
-            ( onRemoveSlide slide model, Cmd.none )
+            ( onRemoveSlide slide model |> onStateChange, Cmd.none )
 
         SavePresentation ->
             ( model
@@ -61,10 +69,10 @@ update message model =
             )
 
         SaveSlide slide ->
-            ( onSaveSlide slide model, Cmd.none )
+            ( onSaveSlide slide model |> onStateChange, Cmd.none )
 
         SlideDown slide ->
-            ( onSlideDown slide model, Cmd.none )
+            ( onSlideDown slide model |> onStateChange, Cmd.none )
 
         SlideTextChanged slide string ->
             ( onSlideTextChanged string slide model
@@ -72,7 +80,10 @@ update message model =
             )
 
         SlideUp slide ->
-            ( onSlideUp slide model, Cmd.none )
+            ( onSlideUp slide model |> onStateChange, Cmd.none )
+
+        Undo ->
+            ( onUndo model, Cmd.none )
 
         UpdateFileName filename ->
             Model.updateFilename filename model
@@ -304,3 +315,36 @@ updateSlideOnDrag dragOrder dropOrder slide =
 
             EQ ->
                 slide
+
+
+onStateChange : Model -> Model
+onStateChange model =
+    { model
+        | undoState =
+            Undo.onStateChange
+                (Just model.presentation)
+                model.undoState
+    }
+
+
+onStateReset : Model -> Model
+onStateReset model =
+    { model | undoState = Undo.initialUndoState }
+
+
+newUndoState : Undo.UndoState Presentation -> Model -> Model
+newUndoState undoState model =
+    { model
+        | undoState = undoState
+        , presentation = Maybe.withDefault [] undoState.liveState
+    }
+
+
+onUndo : Model -> Model
+onUndo model =
+    newUndoState (Undo.undo model.undoState) model
+
+
+onRedo : Model -> Model
+onRedo model =
+    newUndoState (Undo.redo model.undoState) model
