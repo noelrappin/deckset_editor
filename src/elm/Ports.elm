@@ -1,5 +1,8 @@
 port module Ports exposing
-    ( loadPresentationText
+    ( externalRedoMenuClicked
+    , externalSaveMenuClicked
+    , externalUndoMenuClicked
+    , loadPresentationText
     , openFileDialog
     , savePresentationText
     , updateFileName
@@ -9,16 +12,25 @@ port module Ports exposing
 import Json.Encode as Encode exposing (Value)
 
 
-port savePresentationText : Encode.Value -> Cmd msg
+port loadPresentationText : (Value -> msg) -> Sub msg
 
 
 port openFileDialog : () -> Cmd msg
 
 
-port loadPresentationText : (Value -> msg) -> Sub msg
+port savePresentationText : Encode.Value -> Cmd msg
+
+
+port updateFileName : (Value -> msg) -> Sub msg
 
 
 port updateWindowTitle : String -> Cmd msg
 
 
-port updateFileName : (Value -> msg) -> Sub msg
+port externalSaveMenuClicked : (() -> msg) -> Sub msg
+
+
+port externalUndoMenuClicked : (() -> msg) -> Sub msg
+
+
+port externalRedoMenuClicked : (() -> msg) -> Sub msg

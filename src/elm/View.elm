@@ -56,8 +56,9 @@ view : Model -> Html Message
 view model =
     div []
         [ displayPresentationSlides model.presentation
-        , Html.br [] []
-        , viewFooter model
+
+        -- , Html.br [] []
+        -- , viewFooter model
         ]
 
 

@@ -11,7 +11,7 @@ import View exposing (view)
 
 init : () -> ( Model, Cmd Message )
 init _ =
-    ( Model.init , Cmd.none )
+    ( Model.init, Cmd.none )
 
 
 subscriptions : Model -> Sub Message
@@ -19,6 +19,9 @@ subscriptions model =
     Sub.batch
         [ Ports.loadPresentationText Update.LoadPresentation
         , Ports.updateFileName Update.UpdateFileName
+        , Ports.externalSaveMenuClicked (always Update.SavePresentation)
+        , Ports.externalUndoMenuClicked (always Update.Undo)
+        , Ports.externalRedoMenuClicked (always Update.Redo)
         ]
 
 
