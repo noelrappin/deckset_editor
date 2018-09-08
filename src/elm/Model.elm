@@ -27,6 +27,7 @@ import Json.Decode as Decode exposing (Decoder, float, int, string)
 import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as Encode exposing (Value)
 import List.Extra as List
+import Regex
 import Tuple
 import Undo exposing (UndoState)
 
@@ -120,9 +121,19 @@ slideFromIntAndText int text =
     }
 
 
+slideDelimiterRegex : Regex.Regex
+slideDelimiterRegex =
+    Maybe.withDefault Regex.never <|
+        Regex.fromStringWith
+            { caseInsensitive = False
+            , multiline = True
+            }
+            "^-{3,}"
+
+
 textToPresentation : String -> Presentation
 textToPresentation text =
-    String.split "---" text
+    Regex.split slideDelimiterRegex text
         |> List.indexedMap slideFromIntAndText
 
 
