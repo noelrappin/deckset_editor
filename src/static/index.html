@@ -13,60 +13,6 @@
     <section class="section">
       <div id="container" class="container"></div>
     </section>
-    <script>
-      const {dialog} = require('electron').remote
-      var currentWindow = require('electron').remote.getCurrentWindow()
-      var fs = require("fs")
-      var elmApp = Elm.Main.init({node: document.getElementById('container')})
-
-      elmApp.ports.savePresentationText.subscribe(data => {
-        console.log(data)
-        if (data.filename === "") {
-          dialog.showSaveDialog((filename) => {
-            if (filename === undefined) {
-              console.log("oops")
-              return
-            }
-            fs.writeFile(filename, data.body, (err) => {
-              if (err) {
-                console.log(err)
-                return
-              } else {
-                elmApp.ports.updateFileName.send(filename)
-              }
-            })
-          })
-        } else {
-          fs.writeFile(data.filename, data.body, (err) => {
-            if (err) {
-              console.log(err)
-                return
-            }
-          })
-
-        }
-      })
-
-      elmApp.ports.openFileDialog.subscribe(() => {
-        dialog.showOpenDialog((fileNames) => {
-          if(fileNames === undefined){
-            console.log("No file selected")
-            return
-          }
-          var filename = fileNames[0]
-          fs.readFile(fileNames[0], 'utf-8', (err, body) => {
-            if(err){
-                alert("An error ocurred reading the file :" + err.message)
-                return;
-            }
-            elmApp.ports.loadPresentationText.send({filename, body})
-          })
-        })
-      })
-
-      elmApp.ports.updateWindowTitle.subscribe(title => {
-        currentWindow.setTitle(title)
-      })
-    </script>
+    <script src='../javascript/deckset_editor.js'></script>
   </body>
 </html>

@@ -4,6 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
+    "eslint": "^5.5.0",
+    "eslint-config-prettier": "^3.0.1",
+    "eslint-plugin-prettier": "^2.6.2",
+    "prettier": "^1.14.2",
     "webpack": "^4.16.5",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5"
@@ -16,6 +20,9 @@
   "scripts": {
     "make": "elm make src/elm/**.elm --output src/static/elm.js",
     "electron": "electron main.js",
-    "start": "yarn run make && yarn run electron"
+    "start": "yarn run make && yarn run electron",
+    "eslint-check": "eslint --print-config .eslintrc | eslint-config-prettier-check",
+    "eslint": "eslint src/javascript/",
+    "eslint_fix": "eslint src/javascript --fix"
   }
 }
