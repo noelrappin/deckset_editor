@@ -1,5 +1,3 @@
-"use strict"
-
 const electron = require("electron")
 const app = electron.app
 
@@ -14,17 +12,21 @@ function createWindow() {
     width: 1024,
     height: 768
   })
-  mainWindow.loadURL(`file://${ __dirname }/src/static/index.html`)
+  mainWindow.loadURL(`file://${__dirname}/src/static/index.html`)
   mainWindow.webContents.openDevTools()
-  mainWindow.on('closed', function () {
+  mainWindow.on("closed", () => {
     mainWindow = null
   })
 }
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') { app.quit() }
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit()
+  }
 })
 
-app.on('activate', () => {
-  if (mainWindow === null) { createWindow() }
+app.on("activate", () => {
+  if (mainWindow === null) {
+    createWindow()
+  }
 })

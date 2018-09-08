@@ -22,7 +22,7 @@
     "electron": "electron main.js",
     "start": "yarn run make && yarn run electron",
     "eslint-check": "eslint --print-config .eslintrc | eslint-config-prettier-check",
-    "eslint": "eslint src/javascript/",
-    "eslint_fix": "eslint src/javascript --fix"
+    "eslint": "eslint src/javascript/ main.js",
+    "eslint_fix": "eslint src/javascript main.js --fix"
   }
 }
