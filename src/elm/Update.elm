@@ -300,9 +300,10 @@ dragDropComplete dragResult model =
         Nothing ->
             model
 
-        _ ->
+        Just ( dragId, dropId, position ) ->
             { model
                 | presentation = dragPresentation dragResult model.presentation
+                , selected = Just dropId
             }
                 |> onStateChange
 
