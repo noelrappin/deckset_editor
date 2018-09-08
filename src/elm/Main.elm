@@ -22,6 +22,10 @@ subscriptions model =
         , Ports.externalSaveMenuClicked (always Update.SavePresentation)
         , Ports.externalUndoMenuClicked (always Update.Undo)
         , Ports.externalRedoMenuClicked (always Update.Redo)
+        , Ports.externalUpMenuClicked
+            (always <| Update.SlideUp <| Model.selectedSlide model)
+        , Ports.externalDownMenuClicked
+            (always <| Update.SlideDown <| Model.selectedSlide model)
         ]
 
 

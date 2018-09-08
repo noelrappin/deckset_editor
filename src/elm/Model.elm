@@ -9,12 +9,15 @@ module Model exposing
     , init
     , isNextAfter
     , isPreviousTo
+    , isSelected
     , loadFromValue
     , newSlideAfter
     , nextSlide
     , presentationInOrder
     , presentationToString
     , previousSlide
+    , selectedSlide
+    , slideAtOrder
     , slideFromIntAndText
     , textToPresentation
     , updateFilename
@@ -69,6 +72,7 @@ type alias Model =
     , clean : Bool
     , dragDrop : DragDrop.Model Order Order
     , undoState : UndoState Presentation
+    , selected : Maybe Int
     }
 
 
@@ -79,6 +83,7 @@ init =
     , clean = True
     , dragDrop = DragDrop.init
     , undoState = Undo.initialUndoState
+    , selected = Nothing
     }
 
 
@@ -216,3 +221,35 @@ updateFilename filenameValue model =
 
         Err _ ->
             model
+
+
+isSelected : Model -> Slide -> Bool
+isSelected model slide =
+    case model.selected of
+        Nothing ->
+            False
+
+        Just selectedInt ->
+            slide.order == selectedInt
+
+
+slideEqualsOrder : Maybe Int -> Slide -> Bool
+slideEqualsOrder maybeOrder slide =
+    case maybeOrder of
+        Nothing ->
+            False
+
+        Just order ->
+            slide.order == order
+
+
+slideAtOrder : Maybe Int -> Model -> Maybe Slide
+slideAtOrder order model =
+    model.presentation
+        |> List.filter (slideEqualsOrder order)
+        |> List.head
+
+
+selectedSlide : Model -> Maybe Slide
+selectedSlide model =
+    slideAtOrder model.selected model

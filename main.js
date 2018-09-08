@@ -76,8 +76,44 @@ function createWindow() {
           click: () => {
             mainWindow.webContents.send("redoMenuClicked")
           }
+        },
+        { type: "separator" },
+        {
+          label: "Up",
+          accelerator: "Cmd+Up",
+          click: () => {
+            mainWindow.webContents.send("upMenuClicked")
+          }
+        },
+        {
+          label: "Down",
+          accelerator: "Cmd+Down",
+          click: () => {
+            mainWindow.webContents.send("downMenuClicked")
+          }
+        },
+        { type: "separator" },
+        {
+          label: "Edit",
+          accelerator: "Cmd+E",
+          click: () => {
+            mainWindow.webContents.send("editMenuClicked")
+          }
+        },
+        {
+          label: "Delete",
+          accelerator: "Cmd+Delete",
+          click: () => {
+            mainWindow.webContents.send("deleteMenuClicked")
+          }
+        },
+        {
+          label: "Append",
+          // accelerator: "Cmd+Shift+z",
+          click: () => {
+            mainWindow.webContents.send("appendMenuClicked")
+          }
         }
-        // { type: "separator" },
         // { role: "cut" },
         // { role: "copy" },
         // { role: "paste" },

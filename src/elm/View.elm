@@ -6,7 +6,7 @@ import Bulma.Form as BForm
 import Bulma.Layout as BLayout
 import Bulma.Modifiers as BModifiers
 import Html exposing (Html, div, h1, p, text)
-import Html.Attributes exposing (attribute, class, style, value)
+import Html.Attributes exposing (attribute, class, classList, style, value)
 import Html.Events exposing (onClick, onInput)
 import Html5.DragDrop as DragDrop
 import Markdown
@@ -31,18 +31,18 @@ multilineColumnsModifiers =
     { columnsModifiers | multiline = True }
 
 
-slideBoxes : Presentation -> List (Html Message)
-slideBoxes presentation =
-    List.map slideToBox <|
-        Model.presentationInOrder presentation
+slideBoxes : Model -> List (Html Message)
+slideBoxes model =
+    List.map (slideToBox model) <|
+        Model.presentationInOrder model.presentation
 
 
-displayPresentationSlides : Presentation -> Html Message
-displayPresentationSlides presentation =
+displayPresentationSlides : Model -> Html Message
+displayPresentationSlides model =
     BColumns.columns multilineColumnsModifiers
         []
     <|
-        slideBoxes presentation
+        slideBoxes model
             ++ [ BColumns.column BColumns.columnModifiers
                     [ class "is-one-quarter" ]
                     [ div
@@ -55,7 +55,7 @@ displayPresentationSlides presentation =
 view : Model -> Html Message
 view model =
     div []
-        [ displayPresentationSlides model.presentation
+        [ displayPresentationSlides model
 
         -- , Html.br [] []
         -- , viewFooter model
@@ -97,14 +97,20 @@ viewFooter model =
         ]
 
 
-slideToBox : Slide -> BElements.Box Message
-slideToBox slide =
+slideToBox : Model -> Slide -> BElements.Box Message
+slideToBox model slide =
     BColumns.column BColumns.columnModifiers
         [ class "is-one-quarter" ]
         [ BElements.box
             (DragDrop.draggable Update.DragDropMsg slide.order
                 ++ DragDrop.droppable Update.DragDropMsg slide.order
                 ++ [ attribute "data-row" <| String.fromInt slide.order ]
+                ++ [ classList
+                        [ ( "has-background-primary"
+                          , Model.isSelected model slide
+                          )
+                        ]
+                   ]
             )
             [ boxContents slide ]
         ]
@@ -137,15 +143,19 @@ displayModeContents : Slide -> Html Message
 displayModeContents slide =
     div
         []
-        [ div [ class "content" ] [ Markdown.toHtml [] slide.text ]
+        [ div
+            [ class "content"
+            , onClick (Update.SetSelected slide)
+            ]
+            [ Markdown.toHtml [] slide.text ]
         , BLayout.level
             [ class "is-mobile" ]
             [ BLayout.levelLeft []
                 [ BElements.buttons
                     BModifiers.Left
                     [ class "has-addons" ]
-                    [ editButton (Update.SlideUp slide) "⬆️"
-                    , editButton (Update.SlideDown slide) "⬇️"
+                    [ editButton (Update.SlideUp (Just slide)) "⬆️"
+                    , editButton (Update.SlideDown (Just slide)) "⬇️"
                     ]
                 ]
             , BLayout.levelRight []
@@ -165,7 +175,7 @@ editModeContents : Slide -> Html Message
 editModeContents slide =
     div []
         [ div
-            []
+            [ onClick (Update.SetSelected slide) ]
             [ BForm.controlTextArea
                 BForm.controlTextAreaModifiers
                 []
@@ -178,8 +188,8 @@ editModeContents slide =
                 [ BElements.buttons
                     BModifiers.Left
                     [ class "has-addons" ]
-                    [ editButton (Update.SlideUp slide) "⬆️"
-                    , editButton (Update.SlideDown slide) "⬇️"
+                    [ editButton (Update.SlideUp (Just slide)) "⬆️"
+                    , editButton (Update.SlideDown (Just slide)) "⬇️"
                     ]
                 ]
             , BLayout.levelRight []

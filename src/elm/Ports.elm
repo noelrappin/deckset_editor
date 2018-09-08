@@ -1,7 +1,9 @@
 port module Ports exposing
-    ( externalRedoMenuClicked
+    ( externalDownMenuClicked
+    , externalRedoMenuClicked
     , externalSaveMenuClicked
     , externalUndoMenuClicked
+    , externalUpMenuClicked
     , loadPresentationText
     , openFileDialog
     , savePresentationText
@@ -34,3 +36,9 @@ port externalUndoMenuClicked : (() -> msg) -> Sub msg
 
 
 port externalRedoMenuClicked : (() -> msg) -> Sub msg
+
+
+port externalUpMenuClicked : (() -> msg) -> Sub msg
+
+
+port externalDownMenuClicked : (() -> msg) -> Sub msg

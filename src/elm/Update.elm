@@ -21,9 +21,10 @@ type Message
     | RemoveSlide Slide
     | SavePresentation
     | SaveSlide Slide
-    | SlideDown Slide
+    | SetSelected Slide
+    | SlideDown (Maybe Slide)
     | SlideTextChanged Slide String
-    | SlideUp Slide
+    | SlideUp (Maybe Slide)
     | Undo
     | UpdateFileName Value
     | UpdateWindowTitle
@@ -42,7 +43,7 @@ update message model =
             ( onCancelSlide slide model, Cmd.none )
 
         DragDropMsg dragDropMessage ->
-            ( onDragDrop dragDropMessage model |> onStateChange, Cmd.none )
+            ( onDragDrop dragDropMessage model, Cmd.none )
 
         EditSlide slide ->
             ( onEditSlide slide model, Cmd.none )
@@ -71,6 +72,9 @@ update message model =
         SaveSlide slide ->
             ( onSaveSlide slide model |> onStateChange, Cmd.none )
 
+        SetSelected slide ->
+            ( onSetSelected slide model, Cmd.none )
+
         SlideDown slide ->
             ( onSlideDown slide model |> onStateChange, Cmd.none )
 
@@ -93,26 +97,38 @@ update message model =
             ( model, Ports.updateWindowTitle (Model.windowTitle model) )
 
 
-onSlideUp : Slide -> Model -> Model
-onSlideUp slide model =
-    { model
-        | presentation =
-            swapSlides
-                (Model.previousSlide slide model.presentation)
-                (Just slide)
-                model.presentation
-    }
+onSlideUp : Maybe Slide -> Model -> Model
+onSlideUp maybeSlide model =
+    case maybeSlide of
+        Nothing ->
+            model
+
+        Just slide ->
+            { model
+                | presentation =
+                    swapSlides
+                        (Model.previousSlide slide model.presentation)
+                        (Just slide)
+                        model.presentation
+                , selected = Just (slide.order - 1)
+            }
 
 
-onSlideDown : Slide -> Model -> Model
-onSlideDown slide model =
-    { model
-        | presentation =
-            swapSlides
-                (Model.nextSlide slide model.presentation)
-                (Just slide)
-                model.presentation
-    }
+onSlideDown : Maybe Slide -> Model -> Model
+onSlideDown maybeSlide model =
+    case maybeSlide of
+        Nothing ->
+            model
+
+        Just slide ->
+            { model
+                | presentation =
+                    swapSlides
+                        (Model.nextSlide slide model.presentation)
+                        (Just slide)
+                        model.presentation
+                , selected = Just (slide.order + 1)
+            }
 
 
 swapSlides : Maybe Slide -> Maybe Slide -> Presentation -> Presentation
@@ -274,10 +290,21 @@ onDragDrop dragDropMessage model =
         ( dragModel, dragResult ) =
             DragDrop.update dragDropMessage model.dragDrop
     in
-    { model
-        | dragDrop = dragModel
-        , presentation = dragPresentation dragResult model.presentation
-    }
+    { model | dragDrop = dragModel }
+        |> dragDropComplete dragResult
+
+
+dragDropComplete : Model.DragResult -> Model -> Model
+dragDropComplete dragResult model =
+    case dragResult of
+        Nothing ->
+            model
+
+        _ ->
+            { model
+                | presentation = dragPresentation dragResult model.presentation
+            }
+                |> onStateChange
 
 
 dragPresentation : Model.DragResult -> Presentation -> Presentation
@@ -348,3 +375,8 @@ onUndo model =
 onRedo : Model -> Model
 onRedo model =
     newUndoState (Undo.redo model.undoState) model
+
+
+onSetSelected : Slide -> Model -> Model
+onSetSelected slide model =
+    { model | selected = Just slide.order }
