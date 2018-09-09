@@ -162,9 +162,9 @@ displayModeContents slide =
                 [ BElements.buttons
                     BModifiers.Right
                     [ class "has-addons" ]
-                    [ editButton (Update.EditSlide slide) "✏️"
-                    , editButton (Update.RemoveSlide slide) "🗑"
-                    , editButton (Update.AppendSlide slide) "➕"
+                    [ editButton (Update.EditSlide (Just slide)) "✏️"
+                    , editButton (Update.RemoveSlide (Just slide)) "🗑"
+                    , editButton (Update.AppendSlide (Just slide)) "➕"
                     ]
                 ]
             ]

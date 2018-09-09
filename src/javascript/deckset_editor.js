@@ -75,6 +75,17 @@ electron.ipcRenderer.on("downMenuClicked", () => {
   elmApp.ports.externalDownMenuClicked.send(null)
 })
 
+electron.ipcRenderer.on("editMenuClicked", () => {
+  elmApp.ports.externalEditMenuClicked.send(null)
+})
+
+electron.ipcRenderer.on("deleteMenuClicked", () => {
+  elmApp.ports.externalDeleteMenuClicked.send(null)
+})
+
+electron.ipcRenderer.on("appendMenuClicked", () => {
+  elmApp.ports.externalAppendMenuClicked.send(null)
+})
 
 elmApp.ports.updateWindowTitle.subscribe(title => {
   currentWindow.setTitle(title)

@@ -11,14 +11,14 @@ import Undo
 
 type Message
     = AddSlideToEnd
-    | AppendSlide Slide
+    | AppendSlide (Maybe Slide)
     | CancelSlide Slide
     | DragDropMsg (DragDrop.Msg Model.Order Model.Order)
-    | EditSlide Slide
+    | EditSlide (Maybe Slide)
     | LoadPresentation Value
     | OpenFileDialog
     | Redo
-    | RemoveSlide Slide
+    | RemoveSlide (Maybe Slide)
     | SavePresentation
     | SaveSlide Slide
     | SetSelected Slide
@@ -169,11 +169,17 @@ makeEditable slide =
     { slide | mode = Model.Edit, editText = slide.text }
 
 
-onEditSlide : Slide -> Model -> Model
-onEditSlide slide model =
-    { model
-        | presentation = updateSlideAt slide makeEditable model.presentation
-    }
+onEditSlide : Maybe Slide -> Model -> Model
+onEditSlide maybeSlide model =
+    case maybeSlide of
+        Nothing ->
+            model
+
+        Just slide ->
+            { model
+                | presentation =
+                    updateSlideAt slide makeEditable model.presentation
+            }
 
 
 updateEditText : String -> Slide -> Slide
@@ -226,11 +232,11 @@ onAddSlideToEnd model =
     }
 
 
-onAppendSlide : Slide -> Model -> Model
+onAppendSlide : Maybe Slide -> Model -> Model
 onAppendSlide slide model =
     { model
         | presentation =
-            appendSlideToPresentation (Just slide) model.presentation
+            appendSlideToPresentation slide model.presentation
     }
 
 
@@ -270,11 +276,17 @@ sameOrder order slide =
     order == slide.order
 
 
-onRemoveSlide : Slide -> Model -> Model
-onRemoveSlide slide model =
-    { model
-        | presentation = removeSlideFromPresentation slide model.presentation
-    }
+onRemoveSlide : Maybe Slide -> Model -> Model
+onRemoveSlide maybeSlide model =
+    case maybeSlide of
+        Nothing ->
+            model
+
+        Just slide ->
+            { model
+                | presentation =
+                    removeSlideFromPresentation slide model.presentation
+            }
 
 
 removeSlideFromPresentation : Slide -> Presentation -> Presentation

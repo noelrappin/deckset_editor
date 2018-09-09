@@ -16,6 +16,10 @@ init _ =
 
 subscriptions : Model -> Sub Message
 subscriptions model =
+    let
+        selectedSlide =
+            Model.selectedSlide model
+    in
     Sub.batch
         [ Ports.loadPresentationText Update.LoadPresentation
         , Ports.updateFileName Update.UpdateFileName
@@ -23,9 +27,15 @@ subscriptions model =
         , Ports.externalUndoMenuClicked (always Update.Undo)
         , Ports.externalRedoMenuClicked (always Update.Redo)
         , Ports.externalUpMenuClicked
-            (always <| Update.SlideUp <| Model.selectedSlide model)
+            (always <| Update.SlideUp <| selectedSlide)
         , Ports.externalDownMenuClicked
-            (always <| Update.SlideDown <| Model.selectedSlide model)
+            (always <| Update.SlideDown <| selectedSlide)
+        , Ports.externalEditMenuClicked
+            (always <| Update.EditSlide <| selectedSlide)
+        , Ports.externalAppendMenuClicked
+            (always <| Update.AppendSlide <| selectedSlide)
+        , Ports.externalDeleteMenuClicked
+            (always <| Update.RemoveSlide <| selectedSlide)
         ]
 
 
