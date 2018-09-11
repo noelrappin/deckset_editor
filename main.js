@@ -80,14 +80,14 @@ function createWindow() {
         { type: "separator" },
         {
           label: "Up",
-          accelerator: "Cmd+Up",
+          accelerator: "Shift+Up",
           click: () => {
             mainWindow.webContents.send("upMenuClicked")
           }
         },
         {
           label: "Down",
-          accelerator: "Cmd+Down",
+          accelerator: "Shift+Down",
           click: () => {
             mainWindow.webContents.send("downMenuClicked")
           }
