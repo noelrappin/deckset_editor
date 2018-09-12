@@ -1,8 +1,10 @@
 port module Ports exposing
     ( externalAppendMenuClicked
     , externalDeleteMenuClicked
+    , externalDiscardChangesMenuClicked
     , externalDownMenuClicked
     , externalEditMenuClicked
+    , externalKeepChangesMenuClicked
     , externalRedoMenuClicked
     , externalSaveMenuClicked
     , externalUndoMenuClicked
@@ -10,6 +12,7 @@ port module Ports exposing
     , loadPresentationText
     , openFileDialog
     , savePresentationText
+    , selectedSlideInfo
     , updateFileName
     , updateWindowTitle
     )
@@ -23,10 +26,16 @@ port externalAppendMenuClicked : (() -> msg) -> Sub msg
 port externalDeleteMenuClicked : (() -> msg) -> Sub msg
 
 
+port externalDiscardChangesMenuClicked : (() -> msg) -> Sub msg
+
+
 port externalDownMenuClicked : (() -> msg) -> Sub msg
 
 
 port externalEditMenuClicked : (() -> msg) -> Sub msg
+
+
+port externalKeepChangesMenuClicked : (() -> msg) -> Sub msg
 
 
 port externalRedoMenuClicked : (() -> msg) -> Sub msg
@@ -48,6 +57,9 @@ port openFileDialog : () -> Cmd msg
 
 
 port savePresentationText : Encode.Value -> Cmd msg
+
+
+port selectedSlideInfo : Encode.Value -> Cmd msg
 
 
 port updateFileName : (Value -> msg) -> Sub msg

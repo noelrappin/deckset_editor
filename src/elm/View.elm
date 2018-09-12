@@ -196,8 +196,8 @@ editModeContents slide =
                 [ BElements.buttons
                     BModifiers.Right
                     [ class "has-addons" ]
-                    [ editButton (Update.SaveSlide slide) "💾"
-                    , editButton (Update.CancelSlide slide) "🚫"
+                    [ editButton (Update.SaveSlide (Just slide)) "💾"
+                    , editButton (Update.CancelSlide (Just slide)) "🚫"
                     ]
                 ]
             ]

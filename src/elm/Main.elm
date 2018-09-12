@@ -36,6 +36,10 @@ subscriptions model =
             (always <| Update.AppendSlide <| selectedSlide)
         , Ports.externalDeleteMenuClicked
             (always <| Update.RemoveSlide <| selectedSlide)
+        , Ports.externalKeepChangesMenuClicked
+            (always <| Update.SaveSlide <| selectedSlide)
+        , Ports.externalDiscardChangesMenuClicked
+            (always <| Update.CancelSlide <| selectedSlide)
         ]
 
 

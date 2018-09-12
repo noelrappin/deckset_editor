@@ -81,6 +81,8 @@ function createWindow() {
         {
           label: "Up",
           accelerator: "Shift+Up",
+          id: "up",
+          enabled: false,
           click: () => {
             mainWindow.webContents.send("upMenuClicked")
           }
@@ -88,6 +90,8 @@ function createWindow() {
         {
           label: "Down",
           accelerator: "Shift+Down",
+          enabled: false,
+          id: "down",
           click: () => {
             mainWindow.webContents.send("downMenuClicked")
           }
@@ -96,20 +100,43 @@ function createWindow() {
         {
           label: "Edit",
           accelerator: "Cmd+E",
+          id: "edit",
+          enabled: false,
           click: () => {
             mainWindow.webContents.send("editMenuClicked")
           }
         },
         {
+          label: "Keep Changes",
+          accelerator: "Cmd+K",
+          enabled: false,
+          id: "keep",
+          click: () => {
+            mainWindow.webContents.send("keepChangesMenuClicked")
+          }
+        },
+        {
+          label: "Discard Changes",
+          accelerator: "Cmd+D",
+          enabled: false,
+          id: "discard",
+          click: () => {
+            mainWindow.webContents.send("discardChangesMenuClicked")
+          }
+        },
+        {
           label: "Delete",
           accelerator: "Cmd+Delete",
+          enabled: false,
+          id: "delete",
           click: () => {
             mainWindow.webContents.send("deleteMenuClicked")
           }
         },
         {
           label: "Append",
-          // accelerator: "Cmd+Shift+z",
+          enabled: false,
+          id: "append",
           click: () => {
             mainWindow.webContents.send("appendMenuClicked")
           }

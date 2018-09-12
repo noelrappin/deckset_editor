@@ -17,6 +17,7 @@ module Model exposing
     , presentationToString
     , previousSlide
     , selectedSlide
+    , selectedSlideExportInfo
     , slideAtOrder
     , slideFromIntAndText
     , textToPresentation
@@ -207,6 +208,36 @@ encodeFileInfo model =
           , Encode.string <| presentationToString model.presentation
           )
         ]
+
+
+modeToString : Mode -> String
+modeToString mode =
+    case mode of
+        Edit ->
+            "edit"
+
+        Display ->
+            "display"
+
+
+selectedSlideExportInfo : Model -> Value
+selectedSlideExportInfo model =
+    encodeSlideExportInfo <| selectedSlide model
+
+
+encodeSlideExportInfo : Maybe Slide -> Value
+encodeSlideExportInfo maybeSlide =
+    case maybeSlide of
+        Nothing ->
+            Encode.null
+
+        Just slide ->
+            Encode.object
+                [ ( "order", Encode.int slide.order )
+                , ( "mode"
+                  , Encode.string <| modeToString slide.mode
+                  )
+                ]
 
 
 updateFilename : Value -> Model -> Model

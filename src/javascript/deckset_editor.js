@@ -47,6 +47,20 @@ elmApp.ports.savePresentationText.subscribe(data => {
   }
 })
 
+elmApp.ports.selectedSlideInfo.subscribe(data => {
+  if (data) {
+    menu = electron.remote.Menu.getApplicationMenu()
+    menu.getMenuItemById("up").enabled = true
+    menu.getMenuItemById("down").enabled = true
+    menu.getMenuItemById("delete").enabled = true
+    menu.getMenuItemById("append").enabled = true
+    const editMode = data.mode === "edit"
+    menu.getMenuItemById("edit").enabled = !editMode
+    menu.getMenuItemById("keep").enabled = editMode
+    menu.getMenuItemById("discard").enabled = editMode
+  }
+})
+
 elmApp.ports.openFileDialog.subscribe(() => {
   openFile()
 })
@@ -85,6 +99,14 @@ electron.ipcRenderer.on("deleteMenuClicked", () => {
 
 electron.ipcRenderer.on("appendMenuClicked", () => {
   elmApp.ports.externalAppendMenuClicked.send(null)
+})
+
+electron.ipcRenderer.on("keepChangesMenuClicked", () => {
+  elmApp.ports.externalKeepChangesMenuClicked.send(null)
+})
+
+electron.ipcRenderer.on("discardChangesMenuClicked", () => {
+  elmApp.ports.externalDiscardChangesMenuClicked.send(null)
 })
 
 elmApp.ports.updateWindowTitle.subscribe(title => {

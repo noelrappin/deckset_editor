@@ -12,7 +12,7 @@ import Undo
 type Message
     = AddSlideToEnd
     | AppendSlide (Maybe Slide)
-    | CancelSlide Slide
+    | CancelSlide (Maybe Slide)
     | DragDropMsg (DragDrop.Msg Model.Order Model.Order)
     | EditSlide (Maybe Slide)
     | LoadPresentation Value
@@ -20,7 +20,7 @@ type Message
     | Redo
     | RemoveSlide (Maybe Slide)
     | SavePresentation
-    | SaveSlide Slide
+    | SaveSlide (Maybe Slide)
     | SetSelected Slide
     | SlideDown (Maybe Slide)
     | SlideTextChanged Slide String
@@ -28,6 +28,7 @@ type Message
     | Undo
     | UpdateFileName Value
     | UpdateWindowTitle
+    | UpdateSelectedSlideInfo
 
 
 update : Message -> Model -> ( Model, Cmd Message )
@@ -40,13 +41,13 @@ update message model =
             ( onAppendSlide slide model |> onStateChange, Cmd.none )
 
         CancelSlide slide ->
-            ( onCancelSlide slide model, Cmd.none )
+            onCancelSlide slide model |> update UpdateSelectedSlideInfo
 
         DragDropMsg dragDropMessage ->
             ( onDragDrop dragDropMessage model, Cmd.none )
 
         EditSlide slide ->
-            ( onEditSlide slide model, Cmd.none )
+            onEditSlide slide model |> update UpdateSelectedSlideInfo
 
         LoadPresentation value ->
             Model.loadFromValue value model
@@ -64,24 +65,22 @@ update message model =
             ( onRemoveSlide slide model |> onStateChange, Cmd.none )
 
         SavePresentation ->
-            ( model
-            , Ports.savePresentationText
-                (Model.encodeFileInfo model)
-            )
+            ( model, Ports.savePresentationText (Model.encodeFileInfo model) )
 
         SaveSlide slide ->
-            ( onSaveSlide slide model |> onStateChange, Cmd.none )
+            onSaveSlide slide model
+                |> onStateChange
+                |> update UpdateSelectedSlideInfo
 
         SetSelected slide ->
-            ( onSetSelected slide model, Cmd.none )
+            onSetSelected slide model
+                |> update UpdateSelectedSlideInfo
 
         SlideDown slide ->
             ( onSlideDown slide model |> onStateChange, Cmd.none )
 
         SlideTextChanged slide string ->
-            ( onSlideTextChanged string slide model
-            , Cmd.none
-            )
+            ( onSlideTextChanged string slide model, Cmd.none )
 
         SlideUp slide ->
             ( onSlideUp slide model |> onStateChange, Cmd.none )
@@ -95,6 +94,11 @@ update message model =
 
         UpdateWindowTitle ->
             ( model, Ports.updateWindowTitle (Model.windowTitle model) )
+
+        UpdateSelectedSlideInfo ->
+            ( model
+            , Ports.selectedSlideInfo (Model.selectedSlideExportInfo model)
+            )
 
 
 onSlideUp : Maybe Slide -> Model -> Model
@@ -179,6 +183,7 @@ onEditSlide maybeSlide model =
             { model
                 | presentation =
                     updateSlideAt slide makeEditable model.presentation
+                , selected = Just slide.order
             }
 
 
@@ -203,11 +208,17 @@ saveSlide slide =
     { slide | mode = Model.Display, text = slide.editText }
 
 
-onSaveSlide : Slide -> Model -> Model
-onSaveSlide slide model =
-    { model
-        | presentation = updateSlideAt slide saveSlide model.presentation
-    }
+onSaveSlide : Maybe Slide -> Model -> Model
+onSaveSlide maybeSlide model =
+    case maybeSlide of
+        Nothing ->
+            model
+
+        Just slide ->
+            { model
+                | presentation =
+                    updateSlideAt slide saveSlide model.presentation
+            }
 
 
 cancelSlide : Slide -> Slide
@@ -215,11 +226,17 @@ cancelSlide slide =
     { slide | mode = Model.Display }
 
 
-onCancelSlide : Slide -> Model -> Model
-onCancelSlide slide model =
-    { model
-        | presentation = updateSlideAt slide cancelSlide model.presentation
-    }
+onCancelSlide : Maybe Slide -> Model -> Model
+onCancelSlide maybeSlide model =
+    case maybeSlide of
+        Nothing ->
+            model
+
+        Just slide ->
+            { model
+                | presentation =
+                    updateSlideAt slide cancelSlide model.presentation
+            }
 
 
 onAddSlideToEnd : Model -> Model
