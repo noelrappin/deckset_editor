@@ -47,17 +47,96 @@ elmApp.ports.savePresentationText.subscribe(data => {
   }
 })
 
+const contextMenu = new electron.remote.Menu()
+contextMenu.append(
+  new electron.remote.MenuItem({
+    label: "Up",
+    id: "context-up",
+    click: () => {
+      elmApp.ports.externalUpMenuClicked.send(null)
+    }
+  })
+)
+
+contextMenu.append(
+  new electron.remote.MenuItem({
+    label: "Down",
+    id: "context-down",
+    click: () => {
+      elmApp.ports.externalDownMenuClicked.send(null)
+    }
+  })
+)
+
+contextMenu.append(new electron.remote.MenuItem({ type: "separator" }))
+
+contextMenu.append(
+  new electron.remote.MenuItem({
+    label: "Edit",
+    id: "context-edit",
+    click: () => {
+      elmApp.ports.externalEditMenuClicked.send(null)
+    }
+  })
+)
+
+contextMenu.append(
+  new electron.remote.MenuItem({
+    label: "Keep Changes",
+    id: "context-keep",
+    click: () => {
+      elmApp.ports.externalKeepChangesMenuClicked.send(null)
+    }
+  })
+)
+
+contextMenu.append(
+  new electron.remote.MenuItem({
+    label: "Discard Changes",
+    id: "context-discard",
+    click: () => {
+      elmApp.ports.externalDiscardChangesMenuClicked.send(null)
+    }
+  })
+)
+
+contextMenu.append(
+  new electron.remote.MenuItem({
+    label: "Delete",
+    id: "context-delete",
+    click: () => {
+      elmApp.ports.externalDeleteMenuClicked.send(null)
+    }
+  })
+)
+
+contextMenu.append(
+  new electron.remote.MenuItem({
+    label: "Append",
+    id: "context-append",
+    click: () => {
+      elmApp.ports.externalAppendMenuClicked.send(null)
+    }
+  })
+)
+
 elmApp.ports.selectedSlideInfo.subscribe(data => {
   if (data) {
+    const editMode = data.mode === "edit"
     menu = electron.remote.Menu.getApplicationMenu()
     menu.getMenuItemById("up").enabled = true
     menu.getMenuItemById("down").enabled = true
     menu.getMenuItemById("delete").enabled = true
     menu.getMenuItemById("append").enabled = true
-    const editMode = data.mode === "edit"
     menu.getMenuItemById("edit").enabled = !editMode
     menu.getMenuItemById("keep").enabled = editMode
     menu.getMenuItemById("discard").enabled = editMode
+    if (data.contextMenu) {
+      contextMenu.getMenuItemById("context-edit").visible = !editMode
+      contextMenu.getMenuItemById("context-keep").visible = editMode
+      contextMenu.getMenuItemById("context-discard").visible = editMode
+      contextMenu.popup(currentWindow)
+    }
   }
 })
 

@@ -5,6 +5,7 @@ module Model exposing
     , Order
     , Presentation
     , Slide
+    , UpdateType(..)
     , encodeFileInfo
     , init
     , isNextAfter
@@ -43,6 +44,11 @@ type Mode
 
 type alias Order =
     Int
+
+
+type UpdateType
+    = LeftClick
+    | RightClick
 
 
 type alias Slide =
@@ -220,13 +226,13 @@ modeToString mode =
             "display"
 
 
-selectedSlideExportInfo : Model -> Value
-selectedSlideExportInfo model =
-    encodeSlideExportInfo <| selectedSlide model
+selectedSlideExportInfo : Model -> UpdateType -> Value
+selectedSlideExportInfo model updateType =
+    encodeSlideExportInfo updateType <| selectedSlide model
 
 
-encodeSlideExportInfo : Maybe Slide -> Value
-encodeSlideExportInfo maybeSlide =
+encodeSlideExportInfo : UpdateType -> Maybe Slide -> Value
+encodeSlideExportInfo updateType maybeSlide =
     case maybeSlide of
         Nothing ->
             Encode.null
@@ -234,9 +240,8 @@ encodeSlideExportInfo maybeSlide =
         Just slide ->
             Encode.object
                 [ ( "order", Encode.int slide.order )
-                , ( "mode"
-                  , Encode.string <| modeToString slide.mode
-                  )
+                , ( "mode", Encode.string <| modeToString slide.mode )
+                , ( "contextMenu", Encode.bool <| updateType == RightClick )
                 ]
 
 

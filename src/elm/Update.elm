@@ -25,10 +25,11 @@ type Message
     | SlideDown (Maybe Slide)
     | SlideTextChanged Slide String
     | SlideUp (Maybe Slide)
+    | SlideContextMenu (Maybe Slide)
     | Undo
     | UpdateFileName Value
     | UpdateWindowTitle
-    | UpdateSelectedSlideInfo
+    | UpdateSelectedSlideInfo Model.UpdateType
 
 
 update : Message -> Model -> ( Model, Cmd Message )
@@ -41,13 +42,15 @@ update message model =
             ( onAppendSlide slide model |> onStateChange, Cmd.none )
 
         CancelSlide slide ->
-            onCancelSlide slide model |> update UpdateSelectedSlideInfo
+            onCancelSlide slide model
+                |> update (UpdateSelectedSlideInfo Model.LeftClick)
 
         DragDropMsg dragDropMessage ->
             ( onDragDrop dragDropMessage model, Cmd.none )
 
         EditSlide slide ->
-            onEditSlide slide model |> update UpdateSelectedSlideInfo
+            onEditSlide slide model
+                |> update (UpdateSelectedSlideInfo Model.LeftClick)
 
         LoadPresentation value ->
             Model.loadFromValue value model
@@ -70,11 +73,15 @@ update message model =
         SaveSlide slide ->
             onSaveSlide slide model
                 |> onStateChange
-                |> update UpdateSelectedSlideInfo
+                |> update (UpdateSelectedSlideInfo Model.LeftClick)
 
         SetSelected slide ->
+            onSetSelected (Just slide) model
+                |> update (UpdateSelectedSlideInfo Model.LeftClick)
+
+        SlideContextMenu slide ->
             onSetSelected slide model
-                |> update UpdateSelectedSlideInfo
+                |> update (UpdateSelectedSlideInfo Model.RightClick)
 
         SlideDown slide ->
             ( onSlideDown slide model |> onStateChange, Cmd.none )
@@ -95,9 +102,9 @@ update message model =
         UpdateWindowTitle ->
             ( model, Ports.updateWindowTitle (Model.windowTitle model) )
 
-        UpdateSelectedSlideInfo ->
+        UpdateSelectedSlideInfo updateType ->
             ( model
-            , Ports.selectedSlideInfo (Model.selectedSlideExportInfo model)
+            , Ports.selectedSlideInfo <| Model.selectedSlideExportInfo model updateType
             )
 
 
@@ -407,6 +414,11 @@ onRedo model =
     newUndoState (Undo.redo model.undoState) model
 
 
-onSetSelected : Slide -> Model -> Model
-onSetSelected slide model =
-    { model | selected = Just slide.order }
+onSetSelected : Maybe Slide -> Model -> Model
+onSetSelected maybeSlide model =
+    case maybeSlide of
+        Nothing ->
+            { model | selected = Nothing }
+
+        Just slide ->
+            { model | selected = Just slide.order }

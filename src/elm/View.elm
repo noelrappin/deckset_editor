@@ -7,8 +7,10 @@ import Bulma.Layout as BLayout
 import Bulma.Modifiers as BModifiers
 import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (attribute, class, classList, style, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Events as Events exposing (onClick, onInput)
+import Html.Events.Extra.Mouse as Mouse
 import Html5.DragDrop as DragDrop
+import Json.Decode as Decode
 import Markdown
 import Model exposing (Model, Presentation, Slide)
 import Ports exposing (openFileDialog)
@@ -97,10 +99,24 @@ viewFooter model =
         ]
 
 
+onRightClick : msg -> Html.Attribute msg
+onRightClick message =
+    Events.preventDefaultOn
+        "contextmenu"
+        (Decode.map alwaysPreventDefault (Decode.succeed message))
+
+
+alwaysPreventDefault : msg -> ( msg, Bool )
+alwaysPreventDefault msg =
+    ( msg, True )
+
+
 slideToBox : Model -> Slide -> BElements.Box Message
 slideToBox model slide =
     BColumns.column BColumns.columnModifiers
-        [ class "is-one-quarter" ]
+        [ class "is-one-quarter"
+        , onRightClick (Update.SlideContextMenu (Just slide))
+        ]
         [ BElements.box
             (DragDrop.draggable Update.DragDropMsg slide.order
                 ++ DragDrop.droppable Update.DragDropMsg slide.order
