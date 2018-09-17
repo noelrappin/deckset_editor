@@ -68,7 +68,13 @@ update message model =
             ( onRemoveSlide slide model |> onStateChange, Cmd.none )
 
         SavePresentation ->
-            ( model, Ports.savePresentationText (Model.encodeFileInfo model) )
+            let
+                newModel =
+                    onSavePresentation model
+            in
+            ( newModel
+            , Ports.savePresentationText (Model.encodeFileInfo newModel)
+            )
 
         SaveSlide slide ->
             onSaveSlide slide model
@@ -212,7 +218,22 @@ onSlideTextChanged newEditText slide model =
 
 saveSlide : Slide -> Slide
 saveSlide slide =
-    { slide | mode = Model.Display, text = slide.editText }
+    case slide.mode of
+        Model.Edit ->
+            { slide | mode = Model.Display, text = slide.editText }
+
+        Model.Display ->
+            slide
+
+
+savePresentation : Presentation -> Presentation
+savePresentation presentation =
+    List.map saveSlide presentation
+
+
+onSavePresentation : Model -> Model
+onSavePresentation model =
+    { model | presentation = savePresentation model.presentation }
 
 
 onSaveSlide : Maybe Slide -> Model -> Model
