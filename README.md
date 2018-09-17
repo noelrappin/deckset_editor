@@ -40,11 +40,10 @@ This still runs within the Electron shell rather than standalone.
 
 ## Use
 
-The main menu bar is not connected yet.
-
-You can load a Deckset file with the `Open` button at the bottom of the
-screen, and similarly save with the `Save` button. There's no `Save As..`
+You can load a file from Open in the menu, you can save from the menu. There's no `Save As..`
 yet, saving a file with a known location saves the file to that location.
+
+Saving a file saves all open slides in edit mode.
 
 The `+` button at the top creates a new slide.
 
@@ -52,7 +51,8 @@ Once you have slides, they will display in somewhat rendered markdown.
 
 Each slide can be moved up or down with the errors. Clicking the pencil
 opens an edit box for the slide. Clicking the trash can deletes the slide.
-Clicking append adds a new slide after that slide.
+Clicking append adds a new slide after that slide. The edit menu and right 
+click menu will give you the same set of options
 
 An edited slide can be saved or canceled with disk emoji button or the
 x emoji button.
@@ -71,8 +71,6 @@ presentation.
 
 ### Missing features
 
-* Undo
-* Menubar for save and load
 * Save as to a new file
 * Protection for overwriting unsaved data
 * Optional autosave on change
