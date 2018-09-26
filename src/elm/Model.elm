@@ -42,8 +42,8 @@ type Mode
     | Edit
 
 
-type alias Order =
-    Int
+type Order
+    = Order Int
 
 
 type UpdateType
@@ -127,10 +127,34 @@ loadFromImport fileImport model =
 slideFromIntAndText : Int -> String -> Slide
 slideFromIntAndText int text =
     { text = String.trim text
-    , order = int
+    , order = Order int
     , mode = Display
     , editText = ""
     }
+
+
+slideOrder : Slide -> Int
+slideOrder slide =
+    let
+        (Order int) =
+            slide.order
+    in
+    int
+
+
+orderToInt : Order -> Int
+orderToInt (Order int) =
+    int
+
+
+previousOrder : Order -> Order
+previousOrder (Order int) =
+    Order (int - 1)
+
+
+nextOrder : Order -> Order
+nextOrder (Order int) =
+    Order (int + 1)
 
 
 slideDelimiterRegex : Regex.Regex
@@ -152,7 +176,7 @@ textToPresentation text =
 presentationInOrder : Presentation -> Presentation
 presentationInOrder presentation =
     presentation
-        |> List.sortBy .order
+        |> List.sortBy slideOrder
 
 
 presentationToString : Presentation -> String
@@ -178,12 +202,12 @@ nextSlide slide presentation =
 
 isPreviousTo : Slide -> Slide -> Bool
 isPreviousTo targetSlide testSlide =
-    testSlide.order == (targetSlide.order - 1)
+    testSlide.order == previousOrder targetSlide.order
 
 
 isNextAfter : Slide -> Slide -> Bool
 isNextAfter targetSlide testSlide =
-    testSlide.order == (targetSlide.order + 1)
+    testSlide.order == nextOrder targetSlide.order
 
 
 newSlideAfter : Maybe Slide -> Slide
@@ -192,10 +216,10 @@ newSlideAfter slide =
     , order =
         case slide of
             Nothing ->
-                0
+                Order 0
 
             Just s ->
-                s.order + 1
+                nextOrder s.order
     , mode = Edit
     , editText = ""
     }
@@ -239,7 +263,7 @@ encodeSlideExportInfo updateType maybeSlide =
 
         Just slide ->
             Encode.object
-                [ ( "order", Encode.int slide.order )
+                [ ( "order", Encode.int <| orderToInt slide.order )
                 , ( "mode", Encode.string <| modeToString slide.mode )
                 , ( "contextMenu", Encode.bool <| updateType == RightClick )
                 ]
@@ -266,7 +290,7 @@ isSelected model slide =
             False
 
         Just selectedInt ->
-            slide.order == selectedInt
+            slide.order == Order selectedInt
 
 
 slideEqualsOrder : Maybe Int -> Slide -> Bool
@@ -276,7 +300,7 @@ slideEqualsOrder maybeOrder slide =
             False
 
         Just order ->
-            slide.order == order
+            slide.order == Order order
 
 
 slideAtOrder : Maybe Int -> Model -> Maybe Slide
