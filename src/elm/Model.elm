@@ -1,6 +1,5 @@
 module Model exposing
     ( DragResult
-    , Mode(..)
     , Model
     , Order
     , Presentation
@@ -12,15 +11,20 @@ module Model exposing
     , isPreviousTo
     , isSelected
     , loadFromValue
+    , maybeOrderToInt
     , newSlideAfter
+    , nextOrder
     , nextSlide
+    , orderToInt
     , presentationInOrder
     , presentationToString
+    , previousOrder
     , previousSlide
     , selectedSlide
     , selectedSlideExportInfo
     , slideAtOrder
     , slideFromIntAndText
+    , slideOrder
     , textToPresentation
     , updateFilename
     , windowTitle
@@ -37,11 +41,6 @@ import Tuple
 import Undo exposing (UndoState)
 
 
-type Mode
-    = Display
-    | Edit
-
-
 type Order
     = Order Int
 
@@ -54,8 +53,7 @@ type UpdateType
 type alias Slide =
     { text : String
     , order : Order
-    , mode : Mode
-    , editText : String
+    , editText : Maybe String
     }
 
 
@@ -75,18 +73,18 @@ type alias DragResult =
 
 type alias Model =
     { presentation : Presentation
-    , filename : String
+    , filename : Maybe String
     , clean : Bool
     , dragDrop : DragDrop.Model Order Order
     , undoState : UndoState Presentation
-    , selected : Maybe Int
+    , selected : Maybe Order
     }
 
 
 init : Model
 init =
     { presentation = []
-    , filename = ""
+    , filename = Nothing
     , clean = True
     , dragDrop = DragDrop.init
     , undoState = Undo.initialUndoState
@@ -120,7 +118,7 @@ loadFromImport : FileImport -> Model -> Model
 loadFromImport fileImport model =
     { model
         | presentation = textToPresentation fileImport.body
-        , filename = fileImport.filename
+        , filename = Just fileImport.filename
     }
 
 
@@ -128,8 +126,7 @@ slideFromIntAndText : Int -> String -> Slide
 slideFromIntAndText int text =
     { text = String.trim text
     , order = Order int
-    , mode = Display
-    , editText = ""
+    , editText = Nothing
     }
 
 
@@ -145,6 +142,16 @@ slideOrder slide =
 orderToInt : Order -> Int
 orderToInt (Order int) =
     int
+
+
+maybeOrderToInt : Maybe Order -> Int
+maybeOrderToInt maybeOrder =
+    case maybeOrder of
+        Nothing ->
+            -1
+
+        Just order ->
+            orderToInt order
 
 
 previousOrder : Order -> Order
@@ -220,33 +227,32 @@ newSlideAfter slide =
 
             Just s ->
                 nextOrder s.order
-    , mode = Edit
-    , editText = ""
+    , editText = Just ""
     }
 
 
 windowTitle : Model -> String
 windowTitle model =
-    "Deckset Editor: " ++ model.filename
+    "Deckset Editor: " ++ Maybe.withDefault "" model.filename
 
 
 encodeFileInfo : Model -> Value
 encodeFileInfo model =
     Encode.object
-        [ ( "filename", Encode.string model.filename )
+        [ ( "filename", Encode.string <| Maybe.withDefault "" model.filename )
         , ( "body"
           , Encode.string <| presentationToString model.presentation
           )
         ]
 
 
-modeToString : Mode -> String
-modeToString mode =
-    case mode of
-        Edit ->
+modeToString : Slide -> String
+modeToString slide =
+    case slide.editText of
+        Just _ ->
             "edit"
 
-        Display ->
+        Nothing ->
             "display"
 
 
@@ -264,7 +270,7 @@ encodeSlideExportInfo updateType maybeSlide =
         Just slide ->
             Encode.object
                 [ ( "order", Encode.int <| orderToInt slide.order )
-                , ( "mode", Encode.string <| modeToString slide.mode )
+                , ( "mode", Encode.string <| modeToString slide )
                 , ( "contextMenu", Encode.bool <| updateType == RightClick )
                 ]
 
@@ -277,7 +283,7 @@ updateFilename filenameValue model =
     in
     case result of
         Ok filename ->
-            { model | filename = filename }
+            { model | filename = Just filename }
 
         Err _ ->
             model
@@ -289,21 +295,21 @@ isSelected model slide =
         Nothing ->
             False
 
-        Just selectedInt ->
-            slide.order == Order selectedInt
+        Just selectedOrder ->
+            slide.order == selectedOrder
 
 
-slideEqualsOrder : Maybe Int -> Slide -> Bool
+slideEqualsOrder : Maybe Order -> Slide -> Bool
 slideEqualsOrder maybeOrder slide =
     case maybeOrder of
         Nothing ->
             False
 
         Just order ->
-            slide.order == Order order
+            slide.order == order
 
 
-slideAtOrder : Maybe Int -> Model -> Maybe Slide
+slideAtOrder : Maybe Order -> Model -> Maybe Slide
 slideAtOrder order model =
     model.presentation
         |> List.filter (slideEqualsOrder order)

@@ -127,7 +127,7 @@ onSlideUp maybeSlide model =
                         (Model.previousSlide slide model.presentation)
                         (Just slide)
                         model.presentation
-                , selected = Just (slide.order - 1)
+                , selected = Just (Model.previousOrder slide.order)
             }
 
 
@@ -144,7 +144,7 @@ onSlideDown maybeSlide model =
                         (Model.nextSlide slide model.presentation)
                         (Just slide)
                         model.presentation
-                , selected = Just (slide.order + 1)
+                , selected = Just (Model.nextOrder slide.order)
             }
 
 
@@ -164,7 +164,7 @@ swapSlides maybeSlideA maybeSlideB presentation =
             presentation
 
 
-swapOrder : Int -> Int -> Slide -> Slide
+swapOrder : Model.Order -> Model.Order -> Slide -> Slide
 swapOrder a b slide =
     if slide.order == a then
         { slide | order = b }
@@ -183,7 +183,7 @@ updateSlideAt slide =
 
 makeEditable : Slide -> Slide
 makeEditable slide =
-    { slide | mode = Model.Edit, editText = slide.text }
+    { slide | editText = Just slide.text }
 
 
 onEditSlide : Maybe Slide -> Model -> Model
@@ -202,7 +202,7 @@ onEditSlide maybeSlide model =
 
 updateEditText : String -> Slide -> Slide
 updateEditText string slide =
-    { slide | editText = string }
+    { slide | editText = Just string }
 
 
 onSlideTextChanged : String -> Slide -> Model -> Model
@@ -218,12 +218,7 @@ onSlideTextChanged newEditText slide model =
 
 saveSlide : Slide -> Slide
 saveSlide slide =
-    case slide.mode of
-        Model.Edit ->
-            { slide | mode = Model.Display, text = slide.editText }
-
-        Model.Display ->
-            slide
+    { slide | text = Maybe.withDefault "" slide.editText, editText = Nothing }
 
 
 savePresentation : Presentation -> Presentation
@@ -251,7 +246,7 @@ onSaveSlide maybeSlide model =
 
 cancelSlide : Slide -> Slide
 cancelSlide slide =
-    { slide | mode = Model.Display }
+    { slide | editText = Nothing }
 
 
 onCancelSlide : Maybe Slide -> Model -> Model
@@ -295,28 +290,28 @@ appendSlideToPresentation slide presentation =
     presentation
         |> List.map increaseFunction
         |> List.append [ Model.newSlideAfter slide ]
-        |> List.sortBy .order
+        |> List.sortBy Model.slideOrder
 
 
-increaseOrderIfAfter : Maybe Int -> Slide -> Slide
+increaseOrderIfAfter : Maybe Model.Order -> Slide -> Slide
 increaseOrderIfAfter index slide =
-    if slide.order > Maybe.withDefault -1 index then
-        { slide | order = slide.order + 1 }
+    if Model.slideOrder slide > Model.maybeOrderToInt index then
+        { slide | order = Model.nextOrder slide.order }
 
     else
         slide
 
 
-decreaseOrderIfAfter : Int -> Slide -> Slide
+decreaseOrderIfAfter : Model.Order -> Slide -> Slide
 decreaseOrderIfAfter index slide =
-    if slide.order > index then
-        { slide | order = slide.order - 1 }
+    if Model.orderToInt slide.order > Model.orderToInt index then
+        { slide | order = Model.previousOrder slide.order }
 
     else
         slide
 
 
-sameOrder : Int -> Slide -> Bool
+sameOrder : Model.Order -> Slide -> Bool
 sameOrder order slide =
     order == slide.order
 
@@ -383,17 +378,27 @@ updateSlideOnDrag dragOrder dropOrder slide =
         { slide | order = dropOrder }
 
     else
-        case compare dragOrder dropOrder of
+        case compare (Model.orderToInt dragOrder) (Model.orderToInt dropOrder) of
             LT ->
-                if slide.order > dragOrder && slide.order <= dropOrder then
-                    { slide | order = slide.order - 1 }
+                if
+                    Model.orderToInt slide.order
+                        > Model.orderToInt dragOrder
+                        && Model.orderToInt slide.order
+                        <= Model.orderToInt dropOrder
+                then
+                    { slide | order = Model.previousOrder slide.order }
 
                 else
                     slide
 
             GT ->
-                if slide.order < dragOrder && slide.order >= dropOrder then
-                    { slide | order = slide.order + 1 }
+                if
+                    Model.orderToInt slide.order
+                        < Model.orderToInt dragOrder
+                        && Model.orderToInt slide.order
+                        >= Model.orderToInt dropOrder
+                then
+                    { slide | order = Model.nextOrder slide.order }
 
                 else
                     slide

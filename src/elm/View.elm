@@ -120,7 +120,10 @@ slideToBox model slide =
         [ BElements.box
             (DragDrop.draggable Update.DragDropMsg slide.order
                 ++ DragDrop.droppable Update.DragDropMsg slide.order
-                ++ [ attribute "data-row" <| String.fromInt slide.order ]
+                ++ [ attribute "data-row" <|
+                        String.fromInt <|
+                            Model.orderToInt slide.order
+                   ]
                 ++ [ classList
                         [ ( "has-background-primary"
                           , Model.isSelected model slide
@@ -134,11 +137,11 @@ slideToBox model slide =
 
 boxContents : Slide -> Html Message
 boxContents slide =
-    case slide.mode of
-        Model.Display ->
+    case slide.editText of
+        Nothing ->
             displayModeContents slide
 
-        Model.Edit ->
+        Just _ ->
             editModeContents slide
 
 
@@ -195,7 +198,9 @@ editModeContents slide =
             [ BForm.controlTextArea
                 BForm.controlTextAreaModifiers
                 []
-                [ value slide.editText, onInput (Update.SlideTextChanged slide) ]
+                [ value (Maybe.withDefault "" slide.editText)
+                , onInput (Update.SlideTextChanged slide)
+                ]
                 []
             ]
         , BLayout.level
