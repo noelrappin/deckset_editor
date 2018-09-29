@@ -6,6 +6,7 @@ module Model exposing
     , Slide
     , UpdateType(..)
     , encodeFileInfo
+    , explodeSlideStrings
     , init
     , isNextAfter
     , isPreviousTo
@@ -193,18 +194,28 @@ presentationToString presentation =
         |> String.join "\n\n---\n\n"
 
 
-previousSlide : Slide -> Presentation -> Maybe Slide
-previousSlide slide presentation =
-    presentation
-        |> List.filter (isPreviousTo slide)
-        |> List.head
+previousSlide : Maybe Slide -> Presentation -> Maybe Slide
+previousSlide maybeSlide presentation =
+    case maybeSlide of
+        Just slide ->
+            presentation
+                |> List.filter (isPreviousTo slide)
+                |> List.head
+
+        Nothing ->
+            Nothing
 
 
-nextSlide : Slide -> Presentation -> Maybe Slide
-nextSlide slide presentation =
-    presentation
-        |> List.filter (isNextAfter slide)
-        |> List.head
+nextSlide : Maybe Slide -> Presentation -> Maybe Slide
+nextSlide maybeSlide presentation =
+    case maybeSlide of
+        Just slide ->
+            presentation
+                |> List.filter (isNextAfter slide)
+                |> List.head
+
+        Nothing ->
+            Nothing
 
 
 isPreviousTo : Slide -> Slide -> Bool
@@ -217,9 +228,9 @@ isNextAfter targetSlide testSlide =
     testSlide.order == nextOrder targetSlide.order
 
 
-newSlideAfter : Maybe Slide -> Slide
-newSlideAfter slide =
-    { text = ""
+newSlideAfter : Maybe Slide -> String -> Slide
+newSlideAfter slide newText =
+    { text = newText
     , order =
         case slide of
             Nothing ->
@@ -227,7 +238,7 @@ newSlideAfter slide =
 
             Just s ->
                 nextOrder s.order
-    , editText = Just ""
+    , editText = Just newText
     }
 
 
@@ -319,3 +330,14 @@ slideAtOrder order model =
 selectedSlide : Model -> Maybe Slide
 selectedSlide model =
     slideAtOrder model.selected model
+
+
+explodeSlideStrings : Maybe Slide -> List String
+explodeSlideStrings slideMaybe =
+    case slideMaybe of
+        Just slide ->
+            String.split "\n" slide.text
+                |> List.filter (not << (String.trim >> String.isEmpty))
+
+        Nothing ->
+            []

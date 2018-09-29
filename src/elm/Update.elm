@@ -14,8 +14,12 @@ type Message
     | AppendSlide (Maybe Slide)
     | CancelSlide (Maybe Slide)
     | DragDropMsg (DragDrop.Msg Model.Order Model.Order)
+    | DuplicateSlide (Maybe Slide)
     | EditSlide (Maybe Slide)
+    | ExplodeSlide (Maybe Slide)
     | LoadPresentation Value
+    | MergeSlideBackward (Maybe Slide)
+    | MergeSlideForward (Maybe Slide)
     | OpenFileDialog
     | Redo
     | RemoveSlide (Maybe Slide)
@@ -48,15 +52,27 @@ update message model =
         DragDropMsg dragDropMessage ->
             ( onDragDrop dragDropMessage model, Cmd.none )
 
+        DuplicateSlide slide ->
+            ( onDuplicateSlide slide model |> onStateChange, Cmd.none )
+
         EditSlide slide ->
             onEditSlide slide model
                 |> update (UpdateSelectedSlideInfo Model.LeftClick)
+
+        ExplodeSlide maybeSlide ->
+            ( onExplodeSlide maybeSlide model |> onStateChange, Cmd.none )
 
         LoadPresentation value ->
             Model.loadFromValue value model
                 |> onStateReset
                 |> onStateChange
                 |> update UpdateWindowTitle
+
+        MergeSlideBackward maybeSlide ->
+            ( onMergeSlideBackward maybeSlide model |> onStateChange, Cmd.none )
+
+        MergeSlideForward maybeSlide ->
+            ( onMergeSlideForward maybeSlide model |> onStateChange, Cmd.none )
 
         OpenFileDialog ->
             ( model, Ports.openFileDialog () )
@@ -124,7 +140,7 @@ onSlideUp maybeSlide model =
             { model
                 | presentation =
                     swapSlides
-                        (Model.previousSlide slide model.presentation)
+                        (Model.previousSlide maybeSlide model.presentation)
                         (Just slide)
                         model.presentation
                 , selected = Just (Model.previousOrder slide.order)
@@ -141,8 +157,8 @@ onSlideDown maybeSlide model =
             { model
                 | presentation =
                     swapSlides
-                        (Model.nextSlide slide model.presentation)
-                        (Just slide)
+                        (Model.nextSlide maybeSlide model.presentation)
+                        maybeSlide
                         model.presentation
                 , selected = Just (Model.nextOrder slide.order)
             }
@@ -266,9 +282,7 @@ onAddSlideToEnd : Model -> Model
 onAddSlideToEnd model =
     { model
         | presentation =
-            appendSlideToPresentation
-                (List.last model.presentation)
-                model.presentation
+            appendSlideToPresentation (List.last model.presentation) "" model.presentation
     }
 
 
@@ -276,21 +290,34 @@ onAppendSlide : Maybe Slide -> Model -> Model
 onAppendSlide slide model =
     { model
         | presentation =
-            appendSlideToPresentation slide model.presentation
+            appendSlideToPresentation slide "" model.presentation
     }
 
 
-appendSlideToPresentation : Maybe Slide -> Presentation -> Presentation
-appendSlideToPresentation slide presentation =
+appendSlideToPresentation : Maybe Slide -> String -> Presentation -> Presentation
+appendSlideToPresentation slideAfter newSlideText presentation =
     let
         increaseFunction =
-            Maybe.map .order slide
+            Maybe.map .order slideAfter
                 |> increaseOrderIfAfter
     in
     presentation
         |> List.map increaseFunction
-        |> List.append [ Model.newSlideAfter slide ]
+        |> List.append [ Model.newSlideAfter slideAfter newSlideText ]
         |> List.sortBy Model.slideOrder
+
+
+onDuplicateSlide : Maybe Slide -> Model -> Model
+onDuplicateSlide slideMaybe model =
+    case slideMaybe of
+        Just slide ->
+            { model
+                | presentation =
+                    appendSlideToPresentation slideMaybe slide.text model.presentation
+            }
+
+        Nothing ->
+            model
 
 
 increaseOrderIfAfter : Maybe Model.Order -> Slide -> Slide
@@ -318,22 +345,22 @@ sameOrder order slide =
 
 onRemoveSlide : Maybe Slide -> Model -> Model
 onRemoveSlide maybeSlide model =
+    { model
+        | presentation =
+            removeSlideFromPresentation maybeSlide model.presentation
+    }
+
+
+removeSlideFromPresentation : Maybe Slide -> Presentation -> Presentation
+removeSlideFromPresentation maybeSlide presentation =
     case maybeSlide of
         Nothing ->
-            model
+            presentation
 
         Just slide ->
-            { model
-                | presentation =
-                    removeSlideFromPresentation slide model.presentation
-            }
-
-
-removeSlideFromPresentation : Slide -> Presentation -> Presentation
-removeSlideFromPresentation slide presentation =
-    presentation
-        |> List.filterNot (sameOrder slide.order)
-        |> List.map (decreaseOrderIfAfter slide.order)
+            presentation
+                |> List.filterNot (sameOrder slide.order)
+                |> List.map (decreaseOrderIfAfter slide.order)
 
 
 onDragDrop : DragDrop.Msg Model.Order Model.Order -> Model -> Model
@@ -448,3 +475,63 @@ onSetSelected maybeSlide model =
 
         Just slide ->
             { model | selected = Just slide.order }
+
+
+onMergeSlideBackward : Maybe Slide -> Model -> Model
+onMergeSlideBackward maybeSlide model =
+    { model
+        | presentation =
+            mergeSlides
+                maybeSlide
+                (Model.nextSlide maybeSlide model.presentation)
+                model.presentation
+    }
+
+
+onMergeSlideForward : Maybe Slide -> Model -> Model
+onMergeSlideForward maybeSlide model =
+    { model
+        | presentation =
+            mergeSlides
+                (Model.previousSlide maybeSlide model.presentation)
+                maybeSlide
+                model.presentation
+    }
+
+
+mergeSlides : Maybe Slide -> Maybe Slide -> Presentation -> Presentation
+mergeSlides slideMaybeFrom slideMaybeTo presentation =
+    case ( slideMaybeFrom, slideMaybeTo ) of
+        ( Just slideFrom, Just slideTo ) ->
+            presentation
+                |> removeSlideFromPresentation slideMaybeTo
+                |> updateSlideAt
+                    slideFrom
+                    (updateEditText <| slideFrom.text ++ "\n" ++ slideTo.text)
+
+        _ ->
+            presentation
+
+
+appendSlidesToPresentation : Maybe Slide -> List String -> Presentation -> Presentation
+appendSlidesToPresentation slideMaybe stringList presentation =
+    case stringList of
+        [] ->
+            presentation
+
+        head :: tail ->
+            presentation
+                |> appendSlidesToPresentation slideMaybe tail
+                |> appendSlideToPresentation slideMaybe head
+
+
+onExplodeSlide : Maybe Slide -> Model -> Model
+onExplodeSlide slideMaybe model =
+    { model
+        | presentation =
+            model.presentation
+                |> appendSlidesToPresentation
+                    slideMaybe
+                    (Model.explodeSlideStrings slideMaybe)
+                |> removeSlideFromPresentation slideMaybe
+    }

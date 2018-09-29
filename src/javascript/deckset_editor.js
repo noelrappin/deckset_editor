@@ -92,6 +92,46 @@ contextMenu.append(
 
 contextMenu.append(
   new electron.remote.MenuItem({
+    label: "Merge Forward",
+    id: "context-merge-forward",
+    click: () => {
+      elmApp.ports.externalMergeForwardMenuClicked.send(null)
+    }
+  })
+)
+
+contextMenu.append(
+  new electron.remote.MenuItem({
+    label: "Merge Backward",
+    id: "context-merge-backward",
+    click: () => {
+      elmApp.ports.externalMergeBackwardMenuClicked.send(null)
+    }
+  })
+)
+
+contextMenu.append(
+  new electron.remote.MenuItem({
+    label: "Explode",
+    id: "context-explode",
+    click: () => {
+      elmApp.ports.externalExplodeMenuClicked.send(null)
+    }
+  })
+)
+
+contextMenu.append(
+  new electron.remote.MenuItem({
+    label: "Duplicate",
+    id: "context-duplicate",
+    click: () => {
+      elmApp.ports.externalDuplicateMenuClicked.send(null)
+    }
+  })
+)
+
+contextMenu.append(
+  new electron.remote.MenuItem({
     label: "Discard Changes",
     id: "context-discard",
     click: () => {

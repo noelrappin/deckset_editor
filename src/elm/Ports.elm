@@ -3,8 +3,12 @@ port module Ports exposing
     , externalDeleteMenuClicked
     , externalDiscardChangesMenuClicked
     , externalDownMenuClicked
+    , externalDuplicateMenuClicked
     , externalEditMenuClicked
+    , externalExplodeMenuClicked
     , externalKeepChangesMenuClicked
+    , externalMergeBackwardMenuClicked
+    , externalMergeForwardMenuClicked
     , externalRedoMenuClicked
     , externalSaveMenuClicked
     , externalUndoMenuClicked
@@ -36,6 +40,18 @@ port externalEditMenuClicked : (() -> msg) -> Sub msg
 
 
 port externalKeepChangesMenuClicked : (() -> msg) -> Sub msg
+
+
+port externalMergeForwardMenuClicked : (() -> msg) -> Sub msg
+
+
+port externalMergeBackwardMenuClicked : (() -> msg) -> Sub msg
+
+
+port externalExplodeMenuClicked : (() -> msg) -> Sub msg
+
+
+port externalDuplicateMenuClicked : (() -> msg) -> Sub msg
 
 
 port externalRedoMenuClicked : (() -> msg) -> Sub msg

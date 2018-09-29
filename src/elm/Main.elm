@@ -40,6 +40,14 @@ subscriptions model =
             (always <| Update.SaveSlide <| selectedSlide)
         , Ports.externalDiscardChangesMenuClicked
             (always <| Update.CancelSlide <| selectedSlide)
+        , Ports.externalDuplicateMenuClicked
+            (always <| Update.DuplicateSlide <| selectedSlide)
+        , Ports.externalMergeForwardMenuClicked
+            (always <| Update.MergeSlideForward <| selectedSlide)
+        , Ports.externalMergeBackwardMenuClicked
+            (always <| Update.MergeSlideBackward <| selectedSlide)
+        , Ports.externalExplodeMenuClicked
+            (always <| Update.ExplodeSlide <| selectedSlide)
         ]
 
 
