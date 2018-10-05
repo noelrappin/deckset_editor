@@ -4,13 +4,17 @@ module Model exposing
     , Order
     , Presentation
     , Slide
+    , UndoStatus
     , UpdateType(..)
     , encodeFileInfo
     , explodeSlideStrings
     , init
+    , initialMetadata
+    , initialUndoStatus
     , isNextAfter
     , isPreviousTo
     , isSelected
+    , loadFromImport
     , loadFromValue
     , maybeOrderToInt
     , newSlideAfter
@@ -27,7 +31,9 @@ module Model exposing
     , slideFromIntAndText
     , slideOrder
     , textToPresentation
+    , toUndoStatus
     , updateFilename
+    , updateFooter
     , windowTitle
     )
 
@@ -38,6 +44,7 @@ import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as Encode exposing (Value)
 import List.Extra as List
 import Regex
+import String.Extra as String
 import Tuple
 import Undo exposing (UndoState)
 
@@ -77,9 +84,39 @@ type alias Model =
     , filename : Maybe String
     , clean : Bool
     , dragDrop : DragDrop.Model Order Order
-    , undoState : UndoState Presentation
+    , undoState : UndoState UndoStatus
     , selected : Maybe Order
+    , theme : Maybe String
+    , metadata : Metadata
     }
+
+
+type alias UndoStatus =
+    { metadata : Metadata
+    , presentation : Presentation
+    }
+
+
+type alias Metadata =
+    { footer : Maybe String
+    , slideNumbers : Bool
+    , autoscale : Bool
+    , buildLists : Bool
+    }
+
+
+initialMetadata : Metadata
+initialMetadata =
+    { footer = Nothing
+    , slideNumbers = False
+    , autoscale = False
+    , buildLists = False
+    }
+
+
+initialUndoStatus : UndoStatus
+initialUndoStatus =
+    { presentation = [], metadata = initialMetadata }
 
 
 init : Model
@@ -90,7 +127,14 @@ init =
     , dragDrop = DragDrop.init
     , undoState = Undo.initialUndoState
     , selected = Nothing
+    , theme = Nothing
+    , metadata = initialMetadata
     }
+
+
+toUndoStatus : Model -> UndoStatus
+toUndoStatus model =
+    { metadata = model.metadata, presentation = model.presentation }
 
 
 fileImportDecoder : Decoder FileImport
@@ -115,12 +159,36 @@ loadFromValue value model =
             model
 
 
+updateFooter : String -> Metadata -> Metadata
+updateFooter string metadata =
+    { metadata
+        | footer =
+            String.split "footer:" string
+                |> List.map String.trim
+                |> List.last
+    }
+
+
 loadFromImport : FileImport -> Model -> Model
 loadFromImport fileImport model =
-    { model
-        | presentation = textToPresentation fileImport.body
-        , filename = Just fileImport.filename
-    }
+    let
+        lines =
+            String.lines fileImport.body
+    in
+    case lines of
+        first :: rest ->
+            if String.startsWith "footer:" first then
+                { model | metadata = updateFooter first model.metadata }
+                    |> loadFromImport { fileImport | body = String.join "\n" rest }
+
+            else
+                { model
+                    | presentation = textToPresentation fileImport.body
+                    , filename = Just fileImport.filename
+                }
+
+        [] ->
+            model
 
 
 slideFromIntAndText : Int -> String -> Slide
@@ -185,6 +253,16 @@ presentationInOrder : Presentation -> Presentation
 presentationInOrder presentation =
     presentation
         |> List.sortBy slideOrder
+
+
+metadataToString : Metadata -> String
+metadataToString metadata =
+    case metadata.footer of
+        Just string ->
+            "footer: " ++ string ++ "\n\n"
+
+        Nothing ->
+            ""
 
 
 presentationToString : Presentation -> String
@@ -252,7 +330,9 @@ encodeFileInfo model =
     Encode.object
         [ ( "filename", Encode.string <| Maybe.withDefault "" model.filename )
         , ( "body"
-          , Encode.string <| presentationToString model.presentation
+          , Encode.string <|
+                metadataToString model.metadata
+                    ++ presentationToString model.presentation
           )
         ]
 

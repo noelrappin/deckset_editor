@@ -17,6 +17,7 @@ type Message
     | DuplicateSlide (Maybe Slide)
     | EditSlide (Maybe Slide)
     | ExplodeSlide (Maybe Slide)
+    | FooterTextChanged String
     | LoadPresentation Value
     | MergeSlideBackward (Maybe Slide)
     | MergeSlideForward (Maybe Slide)
@@ -61,6 +62,9 @@ update message model =
 
         ExplodeSlide maybeSlide ->
             ( onExplodeSlide maybeSlide model |> onStateChange, Cmd.none )
+
+        FooterTextChanged string ->
+            ( onFooterTextChanged string model |> onStateChange, Cmd.none )
 
         LoadPresentation value ->
             Model.loadFromValue value model
@@ -439,7 +443,7 @@ onStateChange model =
     { model
         | undoState =
             Undo.onStateChange
-                (Just model.presentation)
+                (Just (Model.toUndoStatus model))
                 model.undoState
     }
 
@@ -449,11 +453,16 @@ onStateReset model =
     { model | undoState = Undo.initialUndoState }
 
 
-newUndoState : Undo.UndoState Presentation -> Model -> Model
+newUndoState : Undo.UndoState Model.UndoStatus -> Model -> Model
 newUndoState undoState model =
+    let
+        liveState =
+            Maybe.withDefault Model.initialUndoStatus undoState.liveState
+    in
     { model
         | undoState = undoState
-        , presentation = Maybe.withDefault [] undoState.liveState
+        , presentation = liveState.presentation
+        , metadata = liveState.metadata
     }
 
 
@@ -507,7 +516,7 @@ mergeSlides slideMaybeFrom slideMaybeTo presentation =
                 |> removeSlideFromPresentation slideMaybeTo
                 |> updateSlideAt
                     slideFrom
-                    (updateEditText <| slideFrom.text ++ "\n" ++ slideTo.text)
+                    (updateEditText <| slideFrom.text ++ "\n\n" ++ slideTo.text)
 
         _ ->
             presentation
@@ -535,3 +544,8 @@ onExplodeSlide slideMaybe model =
                     (Model.explodeSlideStrings slideMaybe)
                 |> removeSlideFromPresentation slideMaybe
     }
+
+
+onFooterTextChanged : String -> Model -> Model
+onFooterTextChanged string model =
+    { model | metadata = Model.updateFooter string model.metadata }

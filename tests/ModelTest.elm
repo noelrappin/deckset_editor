@@ -2,6 +2,7 @@ module ModelTest exposing
     ( presentationOrder
     , presentationToString
     , textToPresentation
+    , textWithCorrectMetadata
     )
 
 import Debug
@@ -31,7 +32,7 @@ textToPresentation =
                         textA ++ "\n\n---\n\n" ++ textB ++ "\n\n---\n\n" ++ textC
                 in
                 Model.textToPresentation string
-                    |> List.map .order
+                    |> List.map (\s -> Model.orderToInt s.order)
                     |> Expect.equalLists [ 0, 1, 2 ]
         , fuzz2 string string "handles an extra dash in the delimiter" <|
             \textA textB ->
@@ -92,19 +93,19 @@ presentationOrder =
     describe "Various presentation order fun"
         [ test "can find the previous slide" <|
             \_ ->
-                Model.previousSlide slide1 presentation
+                Model.previousSlide (Just slide1) presentation
                     |> Expect.equal (Just slide0)
         , test "handles previous slide edge case" <|
             \_ ->
-                Model.previousSlide slide0 presentation
+                Model.previousSlide (Just slide0) presentation
                     |> Expect.equal Nothing
         , test "can find the next slide" <|
             \_ ->
-                Model.nextSlide slide1 presentation
+                Model.nextSlide (Just slide1) presentation
                     |> Expect.equal (Just slide2)
         , test "handles next slide edge case" <|
             \_ ->
-                Model.nextSlide slide2 presentation
+                Model.nextSlide (Just slide2) presentation
                     |> Expect.equal Nothing
         , test "is previous true case" <|
             \_ ->
@@ -121,7 +122,33 @@ presentationOrder =
         ]
 
 
-newSlideAfterTest : Test
-newSlideAfterTest =
-    describe "new slide after"
-        [ test ]
+textWithCorrectMetadata : Test
+textWithCorrectMetadata =
+    let
+        fileImport =
+            { filename = "test.file"
+            , body = "footer: a footer\n\ns1\n\n---\n\ns2\n\n---\n\ns3"
+            }
+
+        model =
+            Model.init
+    in
+    describe "File with metadata"
+        [ test "basic filename load" <|
+            \_ ->
+                Model.loadFromImport fileImport model
+                    |> .filename
+                    |> Expect.equal (Just "test.file")
+        , test "slides with metadata" <|
+            \_ ->
+                Model.loadFromImport fileImport model
+                    |> .presentation
+                    |> List.map .text
+                    |> Expect.equal [ "s1", "s2", "s3" ]
+        , test "metadata" <|
+            \_ ->
+                Model.loadFromImport fileImport model
+                    |> .metadata
+                    |> .footer
+                    |> Expect.equal (Just "a footer")
+        ]

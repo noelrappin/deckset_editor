@@ -5,6 +5,7 @@ import Bulma.Elements as BElements exposing (buttonModifiers)
 import Bulma.Form as BForm
 import Bulma.Layout as BLayout
 import Bulma.Modifiers as BModifiers
+import Bulma.Modifiers.Typography as BTypography
 import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (attribute, class, classList, style, value)
 import Html.Events as Events exposing (onClick, onInput)
@@ -57,10 +58,34 @@ displayPresentationSlides model =
 view : Model -> Html Message
 view model =
     div []
-        [ displayPresentationSlides model
+        [ displayMetadata model
+        , displayPresentationSlides model
 
         -- , Html.br [] []
         -- , viewFooter model
+        ]
+
+
+displayMetadata : Model -> Html Message
+displayMetadata model =
+    BColumns.columns multilineColumnsModifiers
+        []
+        [ BColumns.column BColumns.columnModifiers
+            [ class "is-one-fifth" ]
+            [ div
+                [ BTypography.textSize BTypography.Medium ]
+                [ text "Footer:" ]
+            ]
+        , BColumns.column BColumns.columnModifiers
+            [ class "is-four-fifths" ]
+            [ BForm.controlInput
+                BForm.controlInputModifiers
+                []
+                [ value <| Maybe.withDefault "" model.metadata.footer
+                , onInput Update.FooterTextChanged
+                ]
+                []
+            ]
         ]
 
 
