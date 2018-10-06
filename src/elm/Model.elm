@@ -164,7 +164,6 @@ updateFooter string metadata =
     { metadata
         | footer =
             String.split "footer:" string
-                |> List.map String.trim
                 |> List.last
     }
 

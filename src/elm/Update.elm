@@ -238,7 +238,12 @@ onSlideTextChanged newEditText slide model =
 
 saveSlide : Slide -> Slide
 saveSlide slide =
-    { slide | text = Maybe.withDefault "" slide.editText, editText = Nothing }
+    case slide.editText of
+        Just string ->
+            { slide | text = string, editText = Nothing }
+
+        Nothing ->
+            slide
 
 
 savePresentation : Presentation -> Presentation
