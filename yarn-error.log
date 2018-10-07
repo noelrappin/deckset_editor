@@ -1,0 +1,71 @@
+Arguments: 
+  /usr/local/Cellar/node/10.11.0/bin/node /usr/local/Cellar/yarn/1.10.1/libexec/bin/yarn.js install
+
+PATH: 
+  /Users/noel/.yarn/bin:./bin:/Users/noel/.gem/ruby/2.5.1/bin:/Users/noel/.rubies/ruby-2.5.1/lib/ruby/gems/2.5.0/bin:/Users/noel/.rubies/ruby-2.5.1/bin:/usr/local/heroku/bin:/Users/noel/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11/bin:/usr/local/sbin:/Users/noel/bin:/usr/local/opt/fzf/bin
+
+Yarn version: 
+  1.10.1
+
+Node version: 
+  10.11.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/noel/code/github/noelrappin/deckset_editor/package.json: Unexpected token < in JSON at position 117
+      at JSON.parse (<anonymous>)
+      at /usr/local/Cellar/yarn/1.10.1/libexec/lib/cli.js:1136:59
+      at Generator.next (<anonymous>)
+      at step (/usr/local/Cellar/yarn/1.10.1/libexec/lib/cli.js:98:30)
+      at /usr/local/Cellar/yarn/1.10.1/libexec/lib/cli.js:109:13
+
+npm manifest: 
+  {
+    "name": "deckset_editor",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "devDependencies": {
+  <<<<<<< HEAD
+      "eslint": "^5.6.1",
+      "eslint-config-prettier": "^3.1.0",
+      "eslint-plugin-prettier": "^3.0.0",
+      "prettier": "^1.14.3",
+      "webpack": "^4.20.2",
+      "webpack-cli": "^3.1.2",
+      "webpack-dev-server": "^3.1.9"
+  =======
+      "electron": "^3.0.3",
+      "eslint": "^5.5.0",
+      "eslint-config-prettier": "^3.0.1",
+      "eslint-plugin-prettier": "^2.6.2",
+      "prettier": "^1.14.2",
+      "webpack": "^4.16.5",
+      "webpack-cli": "^3.1.0",
+      "webpack-dev-server": "^3.1.5"
+  >>>>>>> update electron
+    },
+    "dependencies": {
+      "bulma": "^0.7.1",
+      "elm": "^0.19.0-bugfix2",
+      "elm-test": "^0.19.0-beta9",
+      "elm-webpack-loader": "^5.0.0",
+      "global": "^4.3.2"
+    },
+    "scripts": {
+      "make": "elm make src/elm/**.elm --output src/static/elm.js",
+      "electron": "electron main.js",
+      "start": "yarn run make && yarn run electron",
+      "eslint-check": "eslint --print-config .eslintrc | eslint-config-prettier-check",
+      "eslint": "eslint src/javascript/ main.js",
+      "eslint_fix": "eslint src/javascript main.js --fix"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  
