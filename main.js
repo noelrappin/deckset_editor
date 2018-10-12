@@ -78,6 +78,10 @@ function createWindow() {
           }
         },
         { type: "separator" },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        { type: "separator" },
         {
           label: "Up",
           accelerator: "Shift+Up",
