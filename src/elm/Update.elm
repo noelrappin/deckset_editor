@@ -90,7 +90,7 @@ update message model =
         SavePresentation ->
             let
                 newModel =
-                    onSavePresentation model
+                    onSavePresentation model |> onStateChange
             in
             ( newModel
             , Ports.savePresentationText (Model.encodeFileInfo newModel)
