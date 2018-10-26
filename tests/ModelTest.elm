@@ -1,5 +1,6 @@
 module ModelTest exposing
-    ( presentationOrder
+    ( fitifyTest
+    , presentationOrder
     , presentationToString
     , textToPresentation
     , textWithCorrectMetadata
@@ -150,5 +151,41 @@ textWithCorrectMetadata =
                 Model.loadFromImport fileImport model
                     |> .metadata
                     |> .footer
-                    |> Expect.equal (Just "a footer")
+                    |> Expect.equal (Just " a footer")
+        ]
+
+
+fitifyTest : Test
+fitifyTest =
+    describe "fitifying slides"
+        [ test "basic performance" <|
+            \_ ->
+                Model.slideFromIntAndText 1 "test slide"
+                    |> Model.fitify
+                    |> .text
+                    |> Expect.equal "# [fit] test slide"
+        , test "multiple lines" <|
+            \_ ->
+                Model.slideFromIntAndText 1 "test slide\nagain"
+                    |> Model.fitify
+                    |> .text
+                    |> Expect.equal "# [fit] test slide\n# [fit] again"
+        , test "multiple lines with blank" <|
+            \_ ->
+                Model.slideFromIntAndText 1 "test slide\n \nagain"
+                    |> Model.fitify
+                    |> .text
+                    |> Expect.equal "# [fit] test slide\n \n# [fit] again"
+        , test "preexisting header" <|
+            \_ ->
+                Model.slideFromIntAndText 1 "## [fit]  test slide"
+                    |> Model.fitify
+                    |> .text
+                    |> Expect.equal "# [fit] test slide"
+        , test "preexisting header no fit" <|
+            \_ ->
+                Model.slideFromIntAndText 1 "##  test slide"
+                    |> Model.fitify
+                    |> .text
+                    |> Expect.equal "# [fit] test slide"
         ]

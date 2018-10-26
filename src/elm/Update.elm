@@ -17,6 +17,7 @@ type Message
     | DuplicateSlide (Maybe Slide)
     | EditSlide (Maybe Slide)
     | ExplodeSlide (Maybe Slide)
+    | FitifySlide (Maybe Slide)
     | FooterTextChanged String
     | LoadPresentation Value
     | MergeSlideBackward (Maybe Slide)
@@ -62,6 +63,9 @@ update message model =
 
         ExplodeSlide maybeSlide ->
             ( onExplodeSlide maybeSlide model |> onStateChange, Cmd.none )
+
+        FitifySlide slide ->
+            ( onFitifySlide slide model |> onStateChange, Cmd.none )
 
         FooterTextChanged string ->
             ( onFooterTextChanged string model |> onStateChange, Cmd.none )
@@ -554,3 +558,16 @@ onExplodeSlide slideMaybe model =
 onFooterTextChanged : String -> Model -> Model
 onFooterTextChanged string model =
     { model | metadata = Model.updateFooter string model.metadata }
+
+
+onFitifySlide : Maybe Slide -> Model -> Model
+onFitifySlide slideMaybe model =
+    case slideMaybe of
+        Just slide ->
+            { model
+                | presentation =
+                    updateSlideAt slide Model.fitify model.presentation
+            }
+
+        Nothing ->
+            model

@@ -6,6 +6,7 @@ port module Ports exposing
     , externalDuplicateMenuClicked
     , externalEditMenuClicked
     , externalExplodeMenuClicked
+    , externalFitifyMenuClicked
     , externalKeepChangesMenuClicked
     , externalMergeBackwardMenuClicked
     , externalMergeForwardMenuClicked
@@ -52,6 +53,9 @@ port externalExplodeMenuClicked : (() -> msg) -> Sub msg
 
 
 port externalDuplicateMenuClicked : (() -> msg) -> Sub msg
+
+
+port externalFitifyMenuClicked : (() -> msg) -> Sub msg
 
 
 port externalRedoMenuClicked : (() -> msg) -> Sub msg

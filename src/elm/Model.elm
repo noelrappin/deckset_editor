@@ -8,6 +8,7 @@ module Model exposing
     , UpdateType(..)
     , encodeFileInfo
     , explodeSlideStrings
+    , fitify
     , init
     , initialMetadata
     , initialUndoStatus
@@ -420,3 +421,33 @@ explodeSlideStrings slideMaybe =
 
         Nothing ->
             []
+
+
+fitifyString : String -> String
+fitifyString string =
+    if String.isBlank string then
+        string
+
+    else
+        Regex.replace fitHeaderRegex (\_ -> "") string
+            |> (++) "# [fit] "
+
+
+fitHeaderRegex : Regex.Regex
+fitHeaderRegex =
+    Maybe.withDefault Regex.never <|
+        Regex.fromStringWith
+            { caseInsensitive = False
+            , multiline = False
+            }
+            "#+\\s*(\\[fit\\])?\\s*"
+
+
+fitify : Slide -> Slide
+fitify slide =
+    { slide
+        | text =
+            String.split "\n" slide.text
+                |> List.map fitifyString
+                |> String.join "\n"
+    }

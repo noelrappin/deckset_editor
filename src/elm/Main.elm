@@ -42,6 +42,8 @@ subscriptions model =
             (always <| Update.CancelSlide <| selectedSlide)
         , Ports.externalDuplicateMenuClicked
             (always <| Update.DuplicateSlide <| selectedSlide)
+        , Ports.externalFitifyMenuClicked
+            (always <| Update.FitifySlide <| selectedSlide)
         , Ports.externalMergeForwardMenuClicked
             (always <| Update.MergeSlideForward <| selectedSlide)
         , Ports.externalMergeBackwardMenuClicked

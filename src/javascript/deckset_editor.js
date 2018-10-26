@@ -132,6 +132,16 @@ contextMenu.append(
 
 contextMenu.append(
   new electron.remote.MenuItem({
+    label: "Fitify",
+    id: "context-fitify",
+    click: () => {
+      elmApp.ports.externalFitifyMenuClicked.send(null)
+    }
+  })
+)
+
+contextMenu.append(
+  new electron.remote.MenuItem({
     label: "Discard Changes",
     id: "context-discard",
     click: () => {
