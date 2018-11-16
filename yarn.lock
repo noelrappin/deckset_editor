@@ -1369,10 +1369,10 @@ elliptic@^6.0.0:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.0"
 
-elm-test@^0.19.0-beta11:
-  version "0.19.0-beta11"
-  resolved "https://registry.yarnpkg.com/elm-test/-/elm-test-0.19.0-beta11.tgz#4b546179245bd20d3a2b10266b04686594723263"
-  integrity sha512-Ttm1gBCY+yDMfk3otRxCIQ90jHzAmgCd4E9cpX5dVISdC0Y53XNSIs0eqD2rseGAf7mx2W66EZ3liHZN09bScA==
+elm-test@^0.19.0-rev3:
+  version "0.19.0-rev3"
+  resolved "https://registry.yarnpkg.com/elm-test/-/elm-test-0.19.0-rev3.tgz#48134f76627b30ae58f97c9cf1a1d127b0ff81b0"
+  integrity sha512-+zcutibM0LOG6uT48bMsSGzyPnptgenxBUjNMJFRYuddTrOFVH1dFCKUu512lsvihBUJixaxjIG+DjQbWlpO/Q==
   dependencies:
     chalk "2.1.0"
     chokidar "1.7.0"
