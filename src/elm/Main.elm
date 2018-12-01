@@ -2,7 +2,7 @@ module Main exposing (init, main, subscriptions)
 
 import Browser
 import Html5.DragDrop as DragDrop
-import Model exposing (Model, Presentation, Slide)
+import Model exposing (Model, Slide, Slides)
 import Ports
 import String
 import Update exposing (Message)
@@ -14,11 +14,15 @@ init _ =
     ( Model.init, Cmd.none )
 
 
+
+-- TODO: remove the list.head behavior to allow multiple selected slides
+
+
 subscriptions : Model -> Sub Message
 subscriptions model =
     let
         selectedSlide =
-            Model.selectedSlide model
+            List.head <| Model.selectedSlides model
     in
     Sub.batch
         [ Ports.loadPresentationText Update.LoadPresentation

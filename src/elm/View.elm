@@ -13,7 +13,7 @@ import Html.Events.Extra.Mouse as Mouse
 import Html5.DragDrop as DragDrop
 import Json.Decode as Decode
 import Markdown
-import Model exposing (Model, Presentation, Slide)
+import Model exposing (Model, Slide, Slides)
 import Ports exposing (openFileDialog)
 import Undo
 import Update exposing (Message)

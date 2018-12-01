@@ -1,10 +1,11 @@
 module Update exposing (Message(..), update)
 
 import Debug
+import Html.Events.Extra.Mouse as Mouse
 import Html5.DragDrop as DragDrop
 import Json.Encode exposing (Value)
 import List.Extra as List
-import Model exposing (Model, Presentation, Slide)
+import Model exposing (Model, Slide, Slides)
 import Ports
 import Undo
 
@@ -151,7 +152,7 @@ onSlideUp maybeSlide model =
                         (Model.previousSlide maybeSlide model.presentation)
                         (Just slide)
                         model.presentation
-                , selected = Just (Model.previousOrder slide.order)
+                , selected = [ Model.previousOrder slide.order ]
             }
 
 
@@ -168,11 +169,11 @@ onSlideDown maybeSlide model =
                         (Model.nextSlide maybeSlide model.presentation)
                         maybeSlide
                         model.presentation
-                , selected = Just (Model.nextOrder slide.order)
+                , selected = [ Model.nextOrder slide.order ]
             }
 
 
-swapSlides : Maybe Slide -> Maybe Slide -> Presentation -> Presentation
+swapSlides : Maybe Slide -> Maybe Slide -> Slides -> Slides
 swapSlides maybeSlideA maybeSlideB presentation =
     case maybeSlideA of
         Just slideA ->
@@ -200,7 +201,7 @@ swapOrder a b slide =
         slide
 
 
-updateSlideAt : Slide -> (Slide -> Slide) -> Presentation -> Presentation
+updateSlideAt : Slide -> (Slide -> Slide) -> Slides -> Slides
 updateSlideAt slide =
     List.updateIf <| \s -> slide.order == s.order
 
@@ -220,7 +221,7 @@ onEditSlide maybeSlide model =
             { model
                 | presentation =
                     updateSlideAt slide makeEditable model.presentation
-                , selected = Just slide.order
+                , selected = [ slide.order ]
             }
 
 
@@ -250,7 +251,7 @@ saveSlide slide =
             slide
 
 
-savePresentation : Presentation -> Presentation
+savePresentation : Slides -> Slides
 savePresentation presentation =
     List.map saveSlide presentation
 
@@ -307,7 +308,7 @@ onAppendSlide slide model =
     }
 
 
-appendSlideToPresentation : Maybe Slide -> String -> Presentation -> Presentation
+appendSlideToPresentation : Maybe Slide -> String -> Slides -> Slides
 appendSlideToPresentation slideAfter newSlideText presentation =
     let
         increaseFunction =
@@ -364,7 +365,7 @@ onRemoveSlide maybeSlide model =
     }
 
 
-removeSlideFromPresentation : Maybe Slide -> Presentation -> Presentation
+removeSlideFromPresentation : Maybe Slide -> Slides -> Slides
 removeSlideFromPresentation maybeSlide presentation =
     case maybeSlide of
         Nothing ->
@@ -395,12 +396,12 @@ dragDropComplete dragResult model =
         Just ( dragId, dropId, position ) ->
             { model
                 | presentation = dragPresentation dragResult model.presentation
-                , selected = Just dropId
+                , selected = [ dropId ]
             }
                 |> onStateChange
 
 
-dragPresentation : Model.DragResult -> Presentation -> Presentation
+dragPresentation : Model.DragResult -> Slides -> Slides
 dragPresentation result presentation =
     case result of
         Nothing ->
@@ -489,10 +490,10 @@ onSetSelected : Maybe Slide -> Model -> Model
 onSetSelected maybeSlide model =
     case maybeSlide of
         Nothing ->
-            { model | selected = Nothing }
+            { model | selected = [] }
 
         Just slide ->
-            { model | selected = Just slide.order }
+            { model | selected = [ slide.order ] }
 
 
 onMergeSlideBackward : Maybe Slide -> Model -> Model
@@ -517,7 +518,7 @@ onMergeSlideForward maybeSlide model =
     }
 
 
-mergeSlides : Maybe Slide -> Maybe Slide -> Presentation -> Presentation
+mergeSlides : Maybe Slide -> Maybe Slide -> Slides -> Slides
 mergeSlides slideMaybeFrom slideMaybeTo presentation =
     case ( slideMaybeFrom, slideMaybeTo ) of
         ( Just slideFrom, Just slideTo ) ->
@@ -531,7 +532,7 @@ mergeSlides slideMaybeFrom slideMaybeTo presentation =
             presentation
 
 
-appendSlidesToPresentation : Maybe Slide -> List String -> Presentation -> Presentation
+appendSlidesToPresentation : Maybe Slide -> List String -> Slides -> Slides
 appendSlidesToPresentation slideMaybe stringList presentation =
     case stringList of
         [] ->

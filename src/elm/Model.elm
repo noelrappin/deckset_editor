@@ -2,8 +2,8 @@ module Model exposing
     ( DragResult
     , Model
     , Order
-    , Presentation
     , Slide
+    , Slides
     , UndoStatus
     , UpdateType(..)
     , encodeFileInfo
@@ -26,8 +26,8 @@ module Model exposing
     , presentationToString
     , previousOrder
     , previousSlide
-    , selectedSlide
     , selectedSlideExportInfo
+    , selectedSlides
     , slideAtOrder
     , slideFromIntAndText
     , slideOrder
@@ -44,6 +44,7 @@ import Json.Decode as Decode exposing (Decoder, float, int, string)
 import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as Encode exposing (Value)
 import List.Extra as List
+import Maybe.Extra as Maybe
 import Regex
 import String.Extra as String
 import Tuple
@@ -72,7 +73,7 @@ type alias FileImport =
     }
 
 
-type alias Presentation =
+type alias Slides =
     List Slide
 
 
@@ -81,12 +82,12 @@ type alias DragResult =
 
 
 type alias Model =
-    { presentation : Presentation
+    { presentation : Slides
     , filename : Maybe String
     , clean : Bool
     , dragDrop : DragDrop.Model Order Order
     , undoState : UndoState UndoStatus
-    , selected : Maybe Order
+    , selected : List Order
     , theme : Maybe String
     , metadata : Metadata
     }
@@ -94,7 +95,7 @@ type alias Model =
 
 type alias UndoStatus =
     { metadata : Metadata
-    , presentation : Presentation
+    , presentation : Slides
     }
 
 
@@ -127,7 +128,7 @@ init =
     , clean = True
     , dragDrop = DragDrop.init
     , undoState = Undo.initialUndoState
-    , selected = Nothing
+    , selected = []
     , theme = Nothing
     , metadata = initialMetadata
     }
@@ -243,13 +244,13 @@ slideDelimiterRegex =
             "^-{3,}"
 
 
-textToPresentation : String -> Presentation
+textToPresentation : String -> Slides
 textToPresentation text =
     Regex.split slideDelimiterRegex text
         |> List.indexedMap slideFromIntAndText
 
 
-presentationInOrder : Presentation -> Presentation
+presentationInOrder : Slides -> Slides
 presentationInOrder presentation =
     presentation
         |> List.sortBy slideOrder
@@ -265,14 +266,14 @@ metadataToString metadata =
             ""
 
 
-presentationToString : Presentation -> String
+presentationToString : Slides -> String
 presentationToString presentation =
     presentationInOrder presentation
         |> List.map .text
         |> String.join "\n\n---\n\n"
 
 
-previousSlide : Maybe Slide -> Presentation -> Maybe Slide
+previousSlide : Maybe Slide -> Slides -> Maybe Slide
 previousSlide maybeSlide presentation =
     case maybeSlide of
         Just slide ->
@@ -284,7 +285,7 @@ previousSlide maybeSlide presentation =
             Nothing
 
 
-nextSlide : Maybe Slide -> Presentation -> Maybe Slide
+nextSlide : Maybe Slide -> Slides -> Maybe Slide
 nextSlide maybeSlide presentation =
     case maybeSlide of
         Just slide ->
@@ -349,12 +350,16 @@ modeToString slide =
 
 selectedSlideExportInfo : Model -> UpdateType -> Value
 selectedSlideExportInfo model updateType =
-    encodeSlideExportInfo updateType <| selectedSlide model
+    encodeSlideExportInfo updateType <| selectedSlides model
 
 
-encodeSlideExportInfo : UpdateType -> Maybe Slide -> Value
-encodeSlideExportInfo updateType maybeSlide =
-    case maybeSlide of
+
+-- todo: make this return a list
+
+
+encodeSlideExportInfo : UpdateType -> Slides -> Value
+encodeSlideExportInfo updateType slides =
+    case List.head slides of
         Nothing ->
             Encode.null
 
@@ -383,10 +388,10 @@ updateFilename filenameValue model =
 isSelected : Model -> Slide -> Bool
 isSelected model slide =
     case model.selected of
-        Nothing ->
+        [] ->
             False
 
-        Just selectedOrder ->
+        selectedOrder :: _ ->
             slide.order == selectedOrder
 
 
@@ -400,16 +405,18 @@ slideEqualsOrder maybeOrder slide =
             slide.order == order
 
 
-slideAtOrder : Maybe Order -> Model -> Maybe Slide
-slideAtOrder order model =
+slideAtOrder : Model -> Order -> Maybe Slide
+slideAtOrder model order =
     model.presentation
-        |> List.filter (slideEqualsOrder order)
+        |> List.filter (slideEqualsOrder <| Just order)
         |> List.head
 
 
-selectedSlide : Model -> Maybe Slide
-selectedSlide model =
-    slideAtOrder model.selected model
+selectedSlides : Model -> List Slide
+selectedSlides model =
+    model.selected
+        |> List.map (slideAtOrder model)
+        |> Maybe.values
 
 
 explodeSlideStrings : Maybe Slide -> List String
