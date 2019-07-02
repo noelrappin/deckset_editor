@@ -1,7 +1,5 @@
 module Update exposing (Message(..), update)
 
-import Debug
-import Html.Events.Extra.Mouse as Mouse
 import Html5.DragDrop as DragDrop
 import Json.Encode exposing (Value)
 import List.Extra as List
@@ -393,7 +391,7 @@ dragDropComplete dragResult model =
         Nothing ->
             model
 
-        Just ( dragId, dropId, position ) ->
+        Just ( _, dropId, _ ) ->
             { model
                 | presentation = dragPresentation dragResult model.presentation
                 , selected = [ dropId ]
@@ -407,7 +405,7 @@ dragPresentation result presentation =
         Nothing ->
             presentation
 
-        Just ( dragOrder, dropOrder, position ) ->
+        Just ( dragOrder, dropOrder, _ ) ->
             List.map
                 (updateSlideOnDrag dragOrder dropOrder)
                 presentation

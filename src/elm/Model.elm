@@ -31,6 +31,7 @@ module Model exposing
     , slideAtOrder
     , slideFromIntAndText
     , slideOrder
+    , slideStrings
     , textToPresentation
     , toUndoStatus
     , updateFilename
@@ -38,7 +39,6 @@ module Model exposing
     , windowTitle
     )
 
-import Debug
 import Html5.DragDrop as DragDrop
 import Json.Decode as Decode exposing (Decoder, float, int, string)
 import Json.Decode.Pipeline exposing (hardcoded, optional, required)
@@ -157,7 +157,7 @@ loadFromValue value model =
         Ok fileImport ->
             loadFromImport fileImport model
 
-        Result.Err error ->
+        Result.Err _ ->
             model
 
 
@@ -417,6 +417,16 @@ selectedSlides model =
     model.selected
         |> List.map (slideAtOrder model)
         |> Maybe.values
+
+
+slideStrings : Maybe Slide -> List String
+slideStrings maybeSlide =
+    case maybeSlide of
+        Just slide ->
+            String.split "\n" slide.text
+
+        Nothing ->
+            []
 
 
 explodeSlideStrings : Maybe Slide -> List String

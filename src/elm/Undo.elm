@@ -8,7 +8,6 @@ module Undo exposing
     , undo
     )
 
-import Debug
 import List
 
 
