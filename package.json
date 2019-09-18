@@ -7,7 +7,7 @@
     "elm-test": "^0.19.0",
     "eslint": "^6.0.1",
     "eslint-config-prettier": "^6.0.0",
-    "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-prettier": "^3.1.1",
     "prettier": "^1.18.2",
     "webpack": "^4.35.2",
     "webpack-cli": "^3.3.5",
