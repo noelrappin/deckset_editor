@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^7.1.8",
+    "electron": "^7.1.9",
     "elm-test": "*",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.9.0",
