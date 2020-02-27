@@ -11,7 +11,11 @@ app.on("ready", createWindow)
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1024,
-    height: 768
+    height: 768,
+    webPreferences: {
+      nodeIntegration: true
+      // preload: path.join(app.getAppPath(), 'preload.js')
+    }
   })
   mainWindow.loadURL(`file://${__dirname}/src/static/index.html`)
   // mainWindow.webContents.openDevTools()

@@ -7,35 +7,33 @@ const dialog = electron.remote.dialog
 const elmApp = Elm.Main.init({ node: document.getElementById("container") })
 
 function openFile() {
-  dialog.showOpenDialog(fileNames => {
-    if (typeof fileNames === "undefined") {
+  const filenames = dialog.showOpenDialogSync()
+  if (typeof filenames === "undefined") {
+    return
+  }
+  const filename = filenames[0]
+  fs.readFile(filenames[0], "utf-8", (err, body) => {
+    if (err) {
+      alert(`An error ocurred reading the file :${err.message}`) // eslint-disable-line no-alert
       return
     }
-    const filename = fileNames[0]
-    fs.readFile(fileNames[0], "utf-8", (err, body) => {
-      if (err) {
-        alert(`An error ocurred reading the file :${err.message}`) // eslint-disable-line no-alert
-        return
-      }
-      elmApp.ports.loadPresentationText.send({ filename, body })
-    })
+    elmApp.ports.loadPresentationText.send({ filename, body })
   })
 }
 
 elmApp.ports.savePresentationText.subscribe(data => {
   if (data.filename === "") {
-    dialog.showSaveDialog(filename => {
-      if (typeof filename === "undefined") {
-        console.log("oops") // eslint-disable-line no-console
+    const filename = dialog.showSaveDialogSync()
+    if (typeof filename === "undefined") {
+      console.log("oops") // eslint-disable-line no-console
+      return
+    }
+    fs.writeFile(filename, data.body, err => {
+      if (err) {
+        console.log(err) // eslint-disable-line no-console
         return
       }
-      fs.writeFile(filename, data.body, err => {
-        if (err) {
-          console.log(err) // eslint-disable-line no-console
-          return
-        }
-        elmApp.ports.updateFileName.send(filename)
-      })
+      elmApp.ports.updateFileName.send(filename)
     })
   } else {
     fs.writeFile(data.filename, data.body, err => {
