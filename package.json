@@ -11,7 +11,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.18.2",
     "webpack": "^4.41.6",
-    "webpack-cli": "^3.3.10",
+    "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
