@@ -6,6 +6,7 @@ module Model exposing
     , Slides
     , UndoStatus
     , UpdateType(..)
+    , editLinesForSlide
     , encodeFileInfo
     , explodeSlideStrings
     , fitify
@@ -15,6 +16,7 @@ module Model exposing
     , isNextAfter
     , isPreviousTo
     , isSelected
+    , isTruncated
     , loadFromImport
     , loadFromValue
     , maybeOrderToInt
@@ -34,6 +36,7 @@ module Model exposing
     , slideStrings
     , textToPresentation
     , toUndoStatus
+    , truncatedText
     , updateFilename
     , updateFooter
     , windowTitle
@@ -423,7 +426,7 @@ slideStrings : Maybe Slide -> List String
 slideStrings maybeSlide =
     case maybeSlide of
         Just slide ->
-            String.split "\n" slide.text
+            String.split "\n" <| truncatedText slide
 
         Nothing ->
             []
@@ -438,6 +441,16 @@ explodeSlideStrings slideMaybe =
 
         Nothing ->
             []
+
+
+editLinesForSlide : Maybe Slide -> Int
+editLinesForSlide slideMaybe =
+    case slideMaybe of
+        Just slide ->
+            3 + (List.length <| String.lines slide.text)
+
+        Nothing ->
+            5
 
 
 fitifyString : String -> String
@@ -468,3 +481,37 @@ fitify slide =
                 |> List.map fitifyString
                 |> String.join "\n"
     }
+
+
+truncatedText : Slide -> String
+truncatedText slide =
+    String.split "\n" slide.text
+        |> List.take 5
+        |> truncateToSpace 35 5
+        |> String.join "\n"
+
+
+approxLines : Int -> String -> Int
+approxLines width string =
+    (String.length string // width) + 1
+
+
+approxHeight : Int -> List String -> Int
+approxHeight width lines =
+    lines
+        |> List.map (approxLines width)
+        |> List.sum
+
+
+truncateToSpace : Int -> Int -> List String -> List String
+truncateToSpace width height lines =
+    if approxHeight width lines <= height then
+        lines
+
+    else
+        truncateToSpace width height <| Maybe.withDefault [] (List.init lines)
+
+
+isTruncated : Slide -> Bool
+isTruncated slide =
+    slide.text == truncatedText slide

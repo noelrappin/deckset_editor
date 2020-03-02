@@ -7,10 +7,11 @@ import Bulma.Layout as BLayout
 import Bulma.Modifiers as BModifiers
 import Bulma.Modifiers.Typography as BTypography
 import Html exposing (Html, div, p, text)
-import Html.Attributes exposing (attribute, class, classList, value)
+import Html.Attributes exposing (attribute, class, classList, rows, value)
 import Html.Events as Events exposing (onClick, onInput)
 import Html5.DragDrop as DragDrop
 import Json.Decode as Decode
+import Maybe exposing (Maybe)
 import Model exposing (Model, Slide)
 import Undo
 import Update exposing (Message)
@@ -186,11 +187,12 @@ displayModeContents slide =
         []
         [ div
             [ class "content"
+            , class "display-content"
             , onClick (Update.SetSelected slide)
             ]
             (Model.slideStrings
                 (Just slide)
-                |> List.map (\t -> p [] [ text t ])
+                |> List.map (\t -> div [] [ text t ])
             )
         , BLayout.level
             [ class "is-mobile" ]
@@ -225,6 +227,7 @@ editModeContents slide =
                 []
                 [ value (Maybe.withDefault "" slide.editText)
                 , onInput (Update.SlideTextChanged slide)
+                , rows <| Model.editLinesForSlide <| Just slide
                 ]
                 []
             ]
