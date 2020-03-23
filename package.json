@@ -7,7 +7,7 @@
     "electron": "^8.0.2",
     "elm-test": "*",
     "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.0",
+    "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.18.2",
     "webpack": "^4.41.6",
