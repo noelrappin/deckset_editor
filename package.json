@@ -6,7 +6,7 @@
   "devDependencies": {
     "electron": "^8.0.2",
     "elm-test": "*",
-    "eslint": "^6.8.0",
+    "eslint": "^7.7.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
     "prettier": "^1.18.2",
