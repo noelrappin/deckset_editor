@@ -13,9 +13,9 @@ function createWindow() {
     width: 1024,
     height: 768,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
       // preload: path.join(app.getAppPath(), 'preload.js')
-    }
+    },
   })
   mainWindow.loadURL(`file://${__dirname}/src/static/index.html`)
   // mainWindow.webContents.openDevTools()
@@ -35,8 +35,8 @@ function createWindow() {
         { role: "hideothers" },
         { role: "unhide" },
         { type: "separator" },
-        { role: "quit" }
-      ]
+        { role: "quit" },
+      ],
     },
     {
       label: "File",
@@ -46,7 +46,7 @@ function createWindow() {
           accelerator: "Cmd+o",
           click: () => {
             mainWindow.webContents.send("openFileMenuClicked")
-          }
+          },
         },
         { type: "separator" },
         {
@@ -54,15 +54,15 @@ function createWindow() {
           accelerator: "Cmd+s",
           click: () => {
             mainWindow.webContents.send("saveFileMenuClicked")
-          }
+          },
         },
         {
           label: "Save File As...",
           click: () => {
             mainWindow.webContents.send("saveFileAsMenuClicked")
-          }
-        }
-      ]
+          },
+        },
+      ],
     },
     {
       label: "Edit",
@@ -72,14 +72,14 @@ function createWindow() {
           accelerator: "Cmd+z",
           click: () => {
             mainWindow.webContents.send("undoMenuClicked")
-          }
+          },
         },
         {
           label: "Redo",
           accelerator: "Cmd+Shift+z",
           click: () => {
             mainWindow.webContents.send("redoMenuClicked")
-          }
+          },
         },
         { type: "separator" },
         { role: "cut" },
@@ -93,7 +93,7 @@ function createWindow() {
           enabled: false,
           click: () => {
             mainWindow.webContents.send("upMenuClicked")
-          }
+          },
         },
         {
           label: "Down",
@@ -102,7 +102,7 @@ function createWindow() {
           id: "down",
           click: () => {
             mainWindow.webContents.send("downMenuClicked")
-          }
+          },
         },
         { type: "separator" },
         {
@@ -112,7 +112,7 @@ function createWindow() {
           enabled: false,
           click: () => {
             mainWindow.webContents.send("editMenuClicked")
-          }
+          },
         },
         {
           label: "Keep Changes",
@@ -121,7 +121,7 @@ function createWindow() {
           id: "keep",
           click: () => {
             mainWindow.webContents.send("keepChangesMenuClicked")
-          }
+          },
         },
         {
           label: "Discard Changes",
@@ -130,7 +130,7 @@ function createWindow() {
           id: "discard",
           click: () => {
             mainWindow.webContents.send("discardChangesMenuClicked")
-          }
+          },
         },
         {
           label: "Delete",
@@ -139,7 +139,7 @@ function createWindow() {
           id: "delete",
           click: () => {
             mainWindow.webContents.send("deleteMenuClicked")
-          }
+          },
         },
         {
           label: "Append",
@@ -147,15 +147,15 @@ function createWindow() {
           id: "append",
           click: () => {
             mainWindow.webContents.send("appendMenuClicked")
-          }
-        }
+          },
+        },
         // { role: "cut" },
         // { role: "copy" },
         // { role: "paste" },
         // { role: "pasteandmatchstyle" },
         // { role: "delete" },
         // { role: "selectall" }
-      ]
+      ],
     },
     {
       label: "View",
@@ -168,8 +168,8 @@ function createWindow() {
         { role: "zoomin" },
         { role: "zoomout" },
         { type: "separator" },
-        { role: "togglefullscreen" }
-      ]
+        { role: "togglefullscreen" },
+      ],
     },
 
     {
@@ -179,8 +179,8 @@ function createWindow() {
         { role: "close" },
         { role: "zoom" },
         { type: "separator" },
-        { role: "front" }
-      ]
+        { role: "front" },
+      ],
     },
     {
       role: "help",
@@ -191,10 +191,10 @@ function createWindow() {
             require("electron").shell.openExternal(
               "https://github.com/noelrappin/deckset_editor"
             )
-          }
-        }
-      ]
-    }
+          },
+        },
+      ],
+    },
   ])
 
   Menu.setApplicationMenu(menu)

@@ -21,14 +21,14 @@ function openFile() {
   })
 }
 
-elmApp.ports.savePresentationText.subscribe(data => {
+elmApp.ports.savePresentationText.subscribe((data) => {
   if (data.filename === "") {
     const filename = dialog.showSaveDialogSync()
     if (typeof filename === "undefined") {
       console.log("oops") // eslint-disable-line no-console
       return
     }
-    fs.writeFile(filename, data.body, err => {
+    fs.writeFile(filename, data.body, (err) => {
       if (err) {
         console.log(err) // eslint-disable-line no-console
         return
@@ -36,7 +36,7 @@ elmApp.ports.savePresentationText.subscribe(data => {
       elmApp.ports.updateFileName.send(filename)
     })
   } else {
-    fs.writeFile(data.filename, data.body, err => {
+    fs.writeFile(data.filename, data.body, (err) => {
       if (err) {
         console.log(err) // eslint-disable-line no-console
         return
@@ -52,7 +52,7 @@ contextMenu.append(
     id: "context-up",
     click: () => {
       elmApp.ports.externalUpMenuClicked.send(null)
-    }
+    },
   })
 )
 
@@ -62,7 +62,7 @@ contextMenu.append(
     id: "context-down",
     click: () => {
       elmApp.ports.externalDownMenuClicked.send(null)
-    }
+    },
   })
 )
 
@@ -74,7 +74,7 @@ contextMenu.append(
     id: "context-edit",
     click: () => {
       elmApp.ports.externalEditMenuClicked.send(null)
-    }
+    },
   })
 )
 
@@ -84,7 +84,7 @@ contextMenu.append(
     id: "context-keep",
     click: () => {
       elmApp.ports.externalKeepChangesMenuClicked.send(null)
-    }
+    },
   })
 )
 
@@ -94,7 +94,7 @@ contextMenu.append(
     id: "context-merge-forward",
     click: () => {
       elmApp.ports.externalMergeForwardMenuClicked.send(null)
-    }
+    },
   })
 )
 
@@ -104,7 +104,7 @@ contextMenu.append(
     id: "context-merge-backward",
     click: () => {
       elmApp.ports.externalMergeBackwardMenuClicked.send(null)
-    }
+    },
   })
 )
 
@@ -114,7 +114,7 @@ contextMenu.append(
     id: "context-explode",
     click: () => {
       elmApp.ports.externalExplodeMenuClicked.send(null)
-    }
+    },
   })
 )
 
@@ -124,7 +124,7 @@ contextMenu.append(
     id: "context-duplicate",
     click: () => {
       elmApp.ports.externalDuplicateMenuClicked.send(null)
-    }
+    },
   })
 )
 
@@ -134,7 +134,7 @@ contextMenu.append(
     id: "context-fitify",
     click: () => {
       elmApp.ports.externalFitifyMenuClicked.send(null)
-    }
+    },
   })
 )
 
@@ -144,7 +144,7 @@ contextMenu.append(
     id: "context-discard",
     click: () => {
       elmApp.ports.externalDiscardChangesMenuClicked.send(null)
-    }
+    },
   })
 )
 
@@ -154,7 +154,7 @@ contextMenu.append(
     id: "context-delete",
     click: () => {
       elmApp.ports.externalDeleteMenuClicked.send(null)
-    }
+    },
   })
 )
 
@@ -164,11 +164,11 @@ contextMenu.append(
     id: "context-append",
     click: () => {
       elmApp.ports.externalAppendMenuClicked.send(null)
-    }
+    },
   })
 )
 
-elmApp.ports.selectedSlideInfo.subscribe(data => {
+elmApp.ports.selectedSlideInfo.subscribe((data) => {
   if (data) {
     const editMode = data.mode === "edit"
     menu = electron.remote.Menu.getApplicationMenu()
@@ -236,6 +236,6 @@ electron.ipcRenderer.on("discardChangesMenuClicked", () => {
   elmApp.ports.externalDiscardChangesMenuClicked.send(null)
 })
 
-elmApp.ports.updateWindowTitle.subscribe(title => {
+elmApp.ports.updateWindowTitle.subscribe((title) => {
   currentWindow.setTitle(title)
 })
